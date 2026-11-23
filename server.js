@@ -2,6 +2,9 @@ const express = require('express');
 const path = require('path');
 require('dotenv').config();
 
+// Phase 2: Import reusable database pool and connection tester
+const { pool, testDbConnection } = require('./src/config/db');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -28,10 +31,40 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Start server
-const server = app.listen(PORT, () => {
-  console.log(`[The Archive] Server is running at http://localhost:${PORT}`);
-  console.log(`[The Archive] Health check available at http://localhost:${PORT}/health`);
+// Phase 2 Safe Database Health Check Route
+app.get('/health/db', async (req, res) => {
+  const result = await testDbConnection();
+
+  if (result.success) {
+    return res.status(200).json({
+      status: 'ok',
+      database: {
+        connected: true,
+        name: result.databaseName,
+        tablesCount: result.tablesCount,
+        tables: result.tables
+      },
+      message: 'Database connection verified successfully'
+    });
+  } else {
+    // 503 Service Unavailable if database is unreachable
+    // Sensitive credentials are NOT leaked in the response
+    return res.status(503).json({
+      status: 'error',
+      database: {
+        connected: false,
+        code: result.errorCode,
+        message: result.errorMessage
+      }
+    });
+  }
 });
 
-module.exports = { app, server };
+// Start server
+const server = app.listen(PORT, () => {
+  console.log(`[The Archive] Server running at http://localhost:${PORT}`);
+  console.log(`[The Archive] Health check: http://localhost:${PORT}/health`);
+  console.log(`[The Archive] Database check: http://localhost:${PORT}/health/db`);
+});
+
+module.exports = { app, server, pool };
