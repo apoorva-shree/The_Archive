@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= page_title %> - The Archive</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="brand-icon-gold">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        </svg>
+      </div>
+      <h1 class="auth-title">THE ARCHIVE</h1>
+      <p class="auth-subtitle" style="font-weight: 700; color: var(--gold-muted); text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem; margin-top: 2px;">IIIT KOTA · DIGITAL LIBRARY</p>
+      <p class="auth-subtitle" style="margin-top: 6px;">Sign in to your library management account</p>
+    </div>
+
+    <!-- Demo Credentials Helper Box for Evaluation -->
+    <div class="auth-demo-box">
+      <strong>Lab Evaluation Demo Credentials:</strong>
+      &bull; <strong>Admin:</strong> <code>admin@library.com</code> / <code>admin123</code><br>
+      &bull; <strong>Student:</strong> <code>rahul.sharma@college.edu</code> / <code>student123</code>
+    </div>
+
+    <% if (typeof notice !== 'undefined' && notice) { %>
+      <div class="alert alert-success">
+        <%= notice %>
+      </div>
+    <% } %>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger">
+        <%= error %>
+      </div>
+    <% } %>
+
+    <% if (typeof flash !== 'undefined' && flash && flash.error) { %>
+      <div class="alert alert-danger">
+        <%= flash.error %>
+      </div>
+    <% } %>
+
+    <% if (typeof flash !== 'undefined' && flash && flash.success) { %>
+      <div class="alert alert-success">
+        <%= flash.success %>
+      </div>
+    <% } %>
+
+    <form method="POST" action="/login" autocomplete="off">
+      <div class="form-group">
+        <label class="form-label" for="email">Email Address <span class="required">*</span></label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          class="form-control" 
+          placeholder="e.g., student@college.edu" 
+          value="<%= typeof email_input !== 'undefined' ? email_input : '' %>" 
+          required 
+          autofocus
+        >
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Password <span class="required">*</span></label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          class="form-control" 
+          placeholder="Enter your account password" 
+          required
+        >
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" style="padding: 12px; margin-top: 10px;">
+        Sign In to Portal &rarr;
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>New Student? <a href="/register">Create an Account</a></p>
+      <p style="margin-top: 8px;"><a href="/" style="color: #64748b;">&larr; Return to Public Website</a></p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

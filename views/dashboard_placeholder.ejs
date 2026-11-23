@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= page_title %> - The Archive</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+
+<div class="auth-wrapper" style="min-height: 100vh; padding: 40px 20px;">
+  <div class="auth-card" style="max-width: 650px;">
+    <div class="auth-header">
+      <div class="brand-icon-gold">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        </svg>
+      </div>
+      <h1 class="auth-title"><%= roleTitle %></h1>
+      <p class="auth-subtitle" style="font-weight: 700; color: var(--gold-muted); text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem; margin-top: 2px;">THE ARCHIVE · IIIT KOTA</p>
+    </div>
+
+    <% if (typeof flash !== 'undefined' && flash && flash.success) { %>
+      <div class="alert alert-success">
+        <%= flash.success %>
+      </div>
+    <% } %>
+
+    <% if (typeof flash !== 'undefined' && flash && flash.error) { %>
+      <div class="alert alert-danger">
+        <%= flash.error %>
+      </div>
+    <% } %>
+
+    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 20px; margin: 20px 0;">
+      <h3 style="margin-top: 0; color: #0F172A;">Authenticated User Profile:</h3>
+      <p style="margin: 6px 0; color: #475569;"><strong>Full Name:</strong> <%= user.full_name %></p>
+      <p style="margin: 6px 0; color: #475569;"><strong>Email Address:</strong> <%= user.email %></p>
+      <p style="margin: 6px 0; color: #475569;"><strong>Role:</strong> <span class="badge <%= user.role === 'admin' ? 'badge-info' : 'badge-neutral' %>"><%= user.role.toUpperCase() %></span></p>
+      <% if (user.student_id) { %>
+        <p style="margin: 6px 0; color: #475569;"><strong>Student Roll ID:</strong> <%= user.student_id %></p>
+      <% } %>
+      <p style="margin: 6px 0; color: #475569;"><strong>Session Store:</strong> MySQL <code>library_management.sessions</code> (Node.js Session Active)</p>
+    </div>
+
+    <div class="alert alert-info">
+      <strong>Phase 3 Authentication Verified!</strong>
+      This landing view confirms that login credentials, password hash verification, role guards, and MySQL session persistence are fully functional in Node.js. Full dashboard features will be migrated in the next phase.
+    </div>
+
+    <div style="display: flex; gap: 12px; margin-top: 24px; justify-content: space-between; align-items: center;">
+      <a href="/logout" class="btn btn-secondary" onclick="return confirm('Do you want to log out?');">
+        Sign Out &rarr;
+      </a>
+      <span class="badge badge-success" style="padding: 8px 14px;">
+        &#10003; Node.js Session Active
+      </span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

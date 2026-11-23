@@ -5,9 +5,12 @@ require('dotenv').config();
 // Phase 2: Database pool and connection tester
 const { pool, testDbConnection } = require('./src/config/db');
 
-// Phase 3 (Step 3.1): Session & Flash Middleware
+// Phase 3: Session & Flash Middleware
 const sessionMiddleware = require('./src/config/session');
 const flashMiddleware = require('./src/middleware/flash');
+
+// Phase 3: Authentication Routes (Login, Register, Logout, Dashboards)
+const authRoutes = require('./src/routes/auth');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -30,6 +33,9 @@ app.use(flashMiddleware);
 // Preserve and serve existing static assets
 // Accessible at /assets/css/style.css, /assets/images/covers/..., etc.
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
+
+// Mount Authentication Routes
+app.use('/', authRoutes);
 
 // Phase 1 Baseline Health Check Route
 app.get('/health', (req, res) => {
@@ -112,7 +118,8 @@ const server = app.listen(PORT, () => {
   console.log(`[The Archive] Server running at http://localhost:${PORT}`);
   console.log(`[The Archive] Health check: http://localhost:${PORT}/health`);
   console.log(`[The Archive] Database check: http://localhost:${PORT}/health/db`);
-  console.log(`[The Archive] Session test: http://localhost:${PORT}/test/session`);
+  console.log(`[The Archive] Login portal: http://localhost:${PORT}/login`);
+  console.log(`[The Archive] Register portal: http://localhost:${PORT}/register`);
 });
 
 module.exports = { app, server, pool };
