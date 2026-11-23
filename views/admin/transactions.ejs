@@ -1,0 +1,112 @@
+<%- include('../partials/header', {
+  pageTitle: 'Transaction History',
+  headerTitle: 'Circulation Transaction Ledger',
+  headerSubtitle: 'Permanent audit log of all borrow requests, approvals, issues, and returns',
+  isAppLayout: true,
+  currentPage: 'transactions'
+}) %>
+
+<!-- Filter & Search Bar -->
+<div class="filter-bar">
+  <form method="GET" action="/admin/transactions" style="display: flex; gap: 12px; width: 100%; flex-wrap: wrap; align-items: center;">
+    <div class="filter-select">
+      <select name="action" class="form-control">
+        <option value="all">All Action Types</option>
+        <option value="borrow_request" <%= (actionFilter === 'borrow_request') ? 'selected' : '' %>>Borrow Requests</option>
+        <option value="request_approved" <%= (actionFilter === 'request_approved') ? 'selected' : '' %>>Request Approvals</option>
+        <option value="request_rejected" <%= (actionFilter === 'request_rejected') ? 'selected' : '' %>>Request Rejections</option>
+        <option value="book_issued" <%= (actionFilter === 'book_issued') ? 'selected' : '' %>>Books Issued</option>
+        <option value="book_returned" <%= (actionFilter === 'book_returned') ? 'selected' : '' %>>Books Returned</option>
+      </select>
+    </div>
+
+    <div class="filter-input">
+      <input 
+        type="text" 
+        name="search" 
+        class="form-control" 
+        placeholder="Search by student, book, or keywords..." 
+        value="<%= typeof search !== 'undefined' ? search : '' %>"
+      >
+    </div>
+
+    <button type="submit" class="btn btn-primary">Filter Ledger</button>
+
+    <% if (actionFilter !== 'all' || (typeof search !== 'undefined' && search)) { %>
+      <a href="/admin/transactions" class="btn btn-secondary">Reset</a>
+    <% } %>
+  </form>
+</div>
+
+<!-- Transactions Table -->
+<div class="content-card">
+  <div class="card-header">
+    <h2>Audit History (<%= transactions.length %> Events Logged)</h2>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Log ID</th>
+          <th>Timestamp</th>
+          <th>Student Details</th>
+          <th>Book Information</th>
+          <th>Circulation Action</th>
+          <th>Audit Remarks / Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (transactions.length === 0) { %>
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 40px; color: #64748b;">
+              No transaction entries found matching the specified criteria.
+            </td>
+          </tr>
+        <% } else { %>
+          <% transactions.forEach(function(tx) { %>
+            <% 
+              const txDate = tx.transaction_date ? new Date(tx.transaction_date) : null;
+              const dateStr = txDate ? txDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+              const timeStr = txDate ? txDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }) : '';
+            %>
+            <tr>
+              <td><code>#TX-<%= tx.id %></code></td>
+              <td>
+                <div style="font-weight: 600;"><%= dateStr %></div>
+                <div style="font-size: 0.78rem; color: #64748b;"><%= timeStr %></div>
+              </td>
+              <td>
+                <div style="font-weight: 700; color: #0f172a;"><%= tx.full_name %></div>
+                <div style="font-size: 0.8rem; color: #64748b;"><%= tx.student_id_number %></div>
+              </td>
+              <td>
+                <div style="font-weight: 600;"><%= tx.title %></div>
+                <div style="font-size: 0.78rem; color: #64748b;">by <%= tx.author %></div>
+              </td>
+              <td>
+                <% if (tx.action === 'borrow_request') { %>
+                  <span class="badge badge-info">Borrow Request</span>
+                <% } else if (tx.action === 'request_approved') { %>
+                  <span class="badge badge-success">Approved</span>
+                <% } else if (tx.action === 'request_rejected') { %>
+                  <span class="badge badge-danger">Rejected</span>
+                <% } else if (tx.action === 'book_issued') { %>
+                  <span class="badge badge-primary" style="background:#dbeafe; color:#1e40af; border:1px solid #93c5fd;">Book Issued</span>
+                <% } else if (tx.action === 'book_returned') { %>
+                  <span class="badge badge-success">Book Returned</span>
+                <% } else { %>
+                  <span class="badge badge-neutral"><%= tx.action %></span>
+                <% } %>
+              </td>
+              <td style="font-size: 0.82rem; color: #334155;">
+                <%= tx.notes || '—' %>
+              </td>
+            </tr>
+          <% }); %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer', { isAppLayout: true }) %>

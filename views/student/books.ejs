@@ -1,0 +1,97 @@
+<%- include('../partials/header', {
+  pageTitle: 'Browse Library Books',
+  headerTitle: 'University Library Catalog',
+  headerSubtitle: 'Search and browse academic volumes available for borrow request',
+  isAppLayout: true,
+  currentPage: 'books'
+}) %>
+
+<!-- Search and Filter Bar -->
+<div class="filter-bar">
+  <form method="GET" action="/student/books" style="display: flex; gap: 12px; width: 100%; flex-wrap: wrap;">
+    <div class="filter-input">
+      <input 
+        type="text" 
+        name="search" 
+        class="form-control" 
+        placeholder="Search books by title, author, or ISBN..." 
+        value="<%= typeof search !== 'undefined' ? search : '' %>"
+      >
+    </div>
+
+    <div class="filter-select">
+      <select name="category" class="form-control">
+        <option value="0">All Disciplines &amp; Categories</option>
+        <% categories.forEach(function(cat) { %>
+          <option value="<%= cat.id %>" <%= (typeof categoryFilter !== 'undefined' && categoryFilter === cat.id) ? 'selected' : '' %>>
+            <%= cat.name %>
+          </option>
+        <% }); %>
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      Search Books
+    </button>
+
+    <% if ((typeof search !== 'undefined' && search) || (typeof categoryFilter !== 'undefined' && categoryFilter > 0)) { %>
+      <a href="/student/books" class="btn btn-secondary">Reset Filter</a>
+    <% } %>
+  </form>
+</div>
+
+<!-- Catalog Results Grid -->
+<div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+  <span style="font-weight: 600; color: #64748b; font-size: 0.9rem;">
+    Showing <%= books.length %> book title(s)
+  </span>
+</div>
+
+<% if (books.length === 0) { %>
+  <div class="content-card">
+    <div class="empty-state">
+      <div class="empty-state-icon">&#128218;</div>
+      <h3>No Books Found</h3>
+      <p>We couldn't find any books matching your query. Try searching with different keywords or choosing a different subject category.</p>
+      <a href="/student/books" class="btn btn-primary">Browse All Books</a>
+    </div>
+  </div>
+<% } else { %>
+  <div class="book-grid">
+    <% books.forEach(function(b) { %>
+      <% 
+        let coverPath = '/assets/images/covers/default_book.svg';
+        if (b.cover_image) {
+          coverPath = '/assets/images/covers/' + b.cover_image;
+        }
+      %>
+      <div class="book-card">
+        <div class="book-cover-wrap">
+          <img src="<%= coverPath %>" alt="<%= b.title %>" class="book-cover-img">
+          <div class="book-badge-pos">
+            <% if (b.available_copies > 0) { %>
+              <span class="badge badge-success"><%= b.available_copies %> Available</span>
+            <% } else { %>
+              <span class="badge badge-danger">Out of Stock</span>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="book-content">
+          <div class="book-category"><%= b.category_name %></div>
+          <h4 class="book-title" title="<%= b.title %>"><%= b.title %></h4>
+          <div class="book-author">By <%= b.author %></div>
+          <div class="book-meta">
+            <span class="copies-info">ISBN: <%= (b.isbn || '').substring(0, 13) %></span>
+            <a href="/student/books/<%= b.id %>" class="btn btn-sm btn-outline-primary">
+              View &amp; Borrow &rarr;
+            </a>
+          </div>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+<% } %>
+
+<%- include('../partials/footer', { isAppLayout: true }) %>

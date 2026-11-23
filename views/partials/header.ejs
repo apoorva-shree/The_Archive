@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof pageTitle !== 'undefined' ? pageTitle + ' - The Archive' : 'The Archive - Digital Library' %></title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <meta name="theme-color" content="#0f172a">
+</head>
+<body>
+
+<% if (typeof isAppLayout !== 'undefined' && isAppLayout) { %>
+<div class="app-container">
+  <%- include('sidebar') %>
+
+  <div class="main-content">
+    <header class="top-header">
+      <div class="header-title-box">
+        <h1><%= typeof headerTitle !== 'undefined' ? headerTitle : 'Dashboard' %></h1>
+        <p><%= typeof headerSubtitle !== 'undefined' ? headerSubtitle : 'Welcome to The Archive Digital Library System' %></p>
+      </div>
+
+      <div class="header-actions">
+        <span class="badge badge-info" style="font-size: 0.8rem; padding: 6px 12px;">
+          <%= new Date().toLocaleDateString('en-GB', { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric' }) %>
+        </span>
+        <a href="/logout" class="btn btn-sm btn-secondary" onclick="return confirm('Do you want to log out?');">
+          Logout
+        </a>
+      </div>
+    </header>
+
+    <main class="page-body">
+      <!-- Flash Notifications Display -->
+      <% if (typeof flash !== 'undefined' && flash) { %>
+        <% if (flash.error) { %>
+          <div class="alert alert-danger">
+            <strong>Error: </strong> <%= flash.error %>
+          </div>
+        <% } %>
+        <% if (flash.success) { %>
+          <div class="alert alert-success">
+            <strong>Notice: </strong> <%= flash.success %>
+          </div>
+        <% } %>
+        <% if (flash.info) { %>
+          <div class="alert alert-info">
+            <strong>Notice: </strong> <%= flash.info %>
+          </div>
+        <% } %>
+        <% if (flash.warning) { %>
+          <div class="alert alert-warning">
+            <strong>Warning: </strong> <%= flash.warning %>
+          </div>
+        <% } %>
+      <% } %>
+<% } %>

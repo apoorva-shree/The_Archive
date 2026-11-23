@@ -150,7 +150,7 @@ router.get('/student/borrow-requests', requireStudent, async (req, res) => {
       return res.status(200).json({ status: 'ok', count: requests.length, requests });
     }
 
-    return res.status(200).json({ status: 'ok', count: requests.length, requests });
+    return res.redirect('/student/loan-history');
   } catch (error) {
     console.error('Error fetching student borrow requests:', error);
     return res.status(500).json({ status: 'error', message: 'Database error fetching borrow requests.' });
@@ -195,11 +195,9 @@ router.get('/admin/borrow-requests', requireAdmin, async (req, res) => {
       });
     }
 
-    return res.status(200).json({
-      status: 'ok',
-      count: requests.length,
-      statusFilter,
-      requests
+    res.render('admin/borrow_requests', {
+      requests,
+      statusFilter
     });
   } catch (error) {
     console.error('Error fetching borrow requests for admin:', error);

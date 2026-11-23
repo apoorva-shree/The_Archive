@@ -1,0 +1,113 @@
+<%- include('../partials/header', {
+  pageTitle: 'Borrow Requests',
+  headerTitle: 'Student Borrow Requests',
+  headerSubtitle: 'Review, approve, or reject book reservation requests from students',
+  isAppLayout: true,
+  currentPage: 'borrow_requests'
+}) %>
+
+<!-- Filter Tabs -->
+<div style="display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;">
+  <a href="/admin/borrow-requests?status=all" class="btn btn-sm <%= (statusFilter === 'all') ? 'btn-primary' : 'btn-secondary' %>">
+    All Requests
+  </a>
+  <a href="/admin/borrow-requests?status=pending" class="btn btn-sm <%= (statusFilter === 'pending') ? 'btn-primary' : 'btn-secondary' %>">
+    Pending Review
+  </a>
+  <a href="/admin/borrow-requests?status=approved" class="btn btn-sm <%= (statusFilter === 'approved') ? 'btn-primary' : 'btn-secondary' %>">
+    Approved
+  </a>
+  <a href="/admin/borrow-requests?status=rejected" class="btn btn-sm <%= (statusFilter === 'rejected') ? 'btn-primary' : 'btn-secondary' %>">
+    Rejected
+  </a>
+</div>
+
+<div class="content-card">
+  <div class="card-header">
+    <h2>Circulation Request Ledger (<%= requests.length %> Total)</h2>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Request ID</th>
+          <th>Student Details</th>
+          <th>Book Information</th>
+          <th>Request Date</th>
+          <th>Available Stock</th>
+          <th>Status</th>
+          <th>Admin Remarks</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (requests.length === 0) { %>
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 40px; color: #64748b;">
+              No borrow requests found for this filter.
+            </td>
+          </tr>
+        <% } else { %>
+          <% requests.forEach(function(req) { %>
+            <% 
+              const reqDate = req.request_date ? new Date(req.request_date).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+            %>
+            <tr>
+              <td><strong>#BR-<%= req.id %></strong></td>
+              <td>
+                <div style="font-weight: 700; color: #0f172a;"><%= req.full_name %></div>
+                <div style="font-size: 0.8rem; color: #64748b;"><%= req.student_id_number %></div>
+                <div style="font-size: 0.78rem; color: #94a3b8;"><%= req.email %></div>
+              </td>
+              <td>
+                <div style="font-weight: 700; color: #0f172a;"><%= req.title %></div>
+                <div style="font-size: 0.8rem; color: #64748b;">by <%= req.author %></div>
+                <div style="font-size: 0.75rem; color: #94a3b8;">ISBN: <%= req.isbn %></div>
+              </td>
+              <td><%= reqDate %></td>
+              <td>
+                <% if (req.available_copies > 0) { %>
+                  <span class="badge badge-success"><%= req.available_copies %> In Stock</span>
+                <% } else { %>
+                  <span class="badge badge-danger">0 Available</span>
+                <% } %>
+              </td>
+              <td>
+                <% if (req.status === 'pending') { %>
+                  <span class="badge badge-warning">Pending</span>
+                <% } else if (req.status === 'approved') { %>
+                  <span class="badge badge-success">Approved</span>
+                <% } else { %>
+                  <span class="badge badge-danger">Rejected</span>
+                <% } %>
+              </td>
+              <td style="font-size: 0.82rem; color: #64748b; max-width: 180px;">
+                <%= req.admin_notes || '—' %>
+              </td>
+              <td>
+                <% if (req.status === 'pending') { %>
+                  <div style="display: flex; gap: 6px;">
+                    <% if (req.available_copies > 0) { %>
+                      <a href="/admin/borrow-requests/<%= req.id %>/approve" class="btn btn-sm btn-success" onclick="return confirm('Approve request and issue book copy for 14 days?');">
+                        Approve
+                      </a>
+                    <% } else { %>
+                      <button class="btn btn-sm btn-secondary" disabled title="Out of stock">No Stock</button>
+                    <% } %>
+                    <a href="/admin/borrow-requests/<%= req.id %>/reject" class="btn btn-sm btn-danger" onclick="return confirm('Reject this request?');">
+                      Reject
+                    </a>
+                  </div>
+                <% } else { %>
+                  <span style="color: #94a3b8; font-size: 0.85rem;">Completed</span>
+                <% } %>
+              </td>
+            </tr>
+          <% }); %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer', { isAppLayout: true }) %>

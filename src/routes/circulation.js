@@ -216,16 +216,44 @@ router.get('/admin/circulation/issued', requireAdmin, async (req, res) => {
       });
     }
 
-    return res.status(200).json({
-      status: 'ok',
-      count: issuedList.length,
+    res.render('admin/issued_books', {
+      issued: issuedList,
       statusFilter,
-      search,
-      issued: issuedList
+      search
     });
   } catch (error) {
     console.error('Error fetching issued books:', error);
     return res.status(500).json({ status: 'error', message: 'Database error fetching issued books.' });
+  }
+});
+
+/**
+ * GET /admin/circulation/issue
+ * Show Direct Issue Book Form
+ */
+router.get('/admin/circulation/issue', requireAdmin, async (req, res) => {
+  const selectedUserId = parseInt(req.query.user_id, 10) || 0;
+  const selectedBookId = parseInt(req.query.book_id, 10) || 0;
+
+  try {
+    const [students] = await pool.query(
+      "SELECT id, full_name, email, student_id_number FROM users WHERE role = 'student' AND status = 'active' ORDER BY full_name ASC"
+    );
+    const [books] = await pool.query(
+      'SELECT id, title, author, isbn, available_copies, total_copies FROM books WHERE available_copies > 0 ORDER BY title ASC'
+    );
+
+    res.render('admin/issue_book', {
+      students,
+      books,
+      selectedUserId,
+      selectedBookId,
+      loanDays: LOAN_PERIOD_DAYS,
+      error: ''
+    });
+  } catch (error) {
+    console.error('Error loading issue book form:', error);
+    res.status(500).send('Database error loading circulation desk.');
   }
 });
 
@@ -287,10 +315,61 @@ router.get('/admin/circulation/overdue', requireAdmin, async (req, res) => {
       return res.status(200).json(responseData);
     }
 
-    return res.status(200).json(responseData);
+    res.render('admin/overdue_books', responseData);
   } catch (error) {
     console.error('Error fetching overdue books:', error);
     return res.status(500).json({ status: 'error', message: 'Database error fetching overdue books.' });
+  }
+});
+
+/**
+ * GET /admin/circulation/return/:id
+ * Show Process Return Page
+ */
+router.get('/admin/circulation/return/:id', requireAdmin, async (req, res) => {
+  const issuedId = parseInt(req.params.id, 10);
+  if (!issuedId || issuedId <= 0) {
+    return res.redirect('/admin/circulation/issued');
+  }
+
+  try {
+    const [rows] = await pool.query(
+      `SELECT ib.*, u.full_name, u.student_id_number, u.email, u.phone,
+              b.title, b.author, b.isbn, b.total_copies, b.available_copies
+       FROM issued_books ib
+       JOIN users u ON ib.user_id = u.id
+       JOIN books b ON ib.book_id = b.id
+       WHERE ib.id = ? LIMIT 1`,
+      [issuedId]
+    );
+
+    if (rows.length === 0) {
+      if (res.redirectWithFlash) {
+        return res.redirectWithFlash('/admin/circulation/issued', 'error', 'Issued book record not found.');
+      }
+      return res.redirect('/admin/circulation/issued');
+    }
+
+    const issue = rows[0];
+    if (issue.status === 'returned') {
+      if (res.redirectWithFlash) {
+        return res.redirectWithFlash('/admin/circulation/issued', 'error', 'This book has already been marked as returned.');
+      }
+      return res.redirect('/admin/circulation/issued');
+    }
+
+    const dueDateStr = issue.due_date ? (issue.due_date.toISOString ? issue.due_date.toISOString().substring(0, 10) : String(issue.due_date).substring(0, 10)) : null;
+    const calc = calculateOverdueAndFine(dueDateStr, null);
+
+    res.render('admin/return_book', {
+      issue,
+      days_overdue: calc.daysOverdue,
+      fine_amount: calc.fineAmount,
+      error: ''
+    });
+  } catch (error) {
+    console.error('Error loading return book page:', error);
+    res.status(500).send('Database error loading return book page.');
   }
 });
 
@@ -449,7 +528,7 @@ router.get('/student/my-loans', requireStudent, async (req, res) => {
       return res.status(200).json(responseData);
     }
 
-    return res.status(200).json(responseData);
+    res.render('student/my_books', responseData);
   } catch (error) {
     console.error('Error fetching student active loans:', error);
     return res.status(500).json({ status: 'error', message: 'Database error fetching active loans.' });
@@ -498,7 +577,7 @@ router.get('/student/loan-history', requireStudent, async (req, res) => {
       return res.status(200).json(responseData);
     }
 
-    return res.status(200).json(responseData);
+    res.render('student/borrow_history', responseData);
   } catch (error) {
     console.error('Error fetching student loan history:', error);
     return res.status(500).json({ status: 'error', message: 'Database error fetching loan history.' });

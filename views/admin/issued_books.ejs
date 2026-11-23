@@ -1,0 +1,140 @@
+<%- include('../partials/header', {
+  pageTitle: 'Issued Books',
+  headerTitle: 'Issued Books & Active Circulation',
+  headerSubtitle: 'Monitor loan deadlines, track returns, and record fine payments',
+  isAppLayout: true,
+  currentPage: 'issued_books'
+}) %>
+
+<!-- Filter & Search Bar -->
+<div class="filter-bar">
+  <form method="GET" action="/admin/circulation/issued" style="display: flex; gap: 12px; width: 100%; flex-wrap: wrap; align-items: center;">
+    <div style="display: flex; gap: 6px;">
+      <a href="/admin/circulation/issued?status=active" class="btn btn-sm <%= (statusFilter === 'active') ? 'btn-primary' : 'btn-secondary' %>">
+        Active Loans
+      </a>
+      <a href="/admin/circulation/issued?status=overdue" class="btn btn-sm <%= (statusFilter === 'overdue') ? 'btn-danger' : 'btn-secondary' %>">
+        Overdue Only
+      </a>
+      <a href="/admin/circulation/issued?status=returned" class="btn btn-sm <%= (statusFilter === 'returned') ? 'btn-primary' : 'btn-secondary' %>">
+        Returned History
+      </a>
+      <a href="/admin/circulation/issued?status=all" class="btn btn-sm <%= (statusFilter === 'all') ? 'btn-primary' : 'btn-secondary' %>">
+        All Records
+      </a>
+    </div>
+
+    <div class="filter-input" style="max-width: 320px;">
+      <input 
+        type="text" 
+        name="search" 
+        class="form-control" 
+        placeholder="Search student or book title..." 
+        value="<%= typeof search !== 'undefined' ? search : '' %>"
+      >
+      <input type="hidden" name="status" value="<%= statusFilter %>">
+    </div>
+
+    <button type="submit" class="btn btn-secondary">Search</button>
+
+    <div style="margin-left: auto;">
+      <a href="/admin/circulation/issue" class="btn btn-success">+ Issue Book Directly</a>
+    </div>
+  </form>
+</div>
+
+<!-- Issued Books Table -->
+<div class="content-card">
+  <div class="card-header">
+    <h2>Circulation Records (<%= issued.length %> Found)</h2>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Issue ID</th>
+          <th>Student Details</th>
+          <th>Book Title &amp; ISBN</th>
+          <th>Issue Date</th>
+          <th>Due Date</th>
+          <th>Return Date</th>
+          <th>Status</th>
+          <th>Fine</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (issued.length === 0) { %>
+          <tr>
+            <td colspan="9" style="text-align: center; padding: 40px; color: #64748b;">
+              No records found for the selected circulation filter.
+            </td>
+          </tr>
+        <% } else { %>
+          <% issued.forEach(function(row) { %>
+            <% 
+              const isActive = (row.status !== 'returned');
+              const fineVal = isActive ? (row.calculated_fine || 0) : (parseFloat(row.fine_amount) || 0);
+            %>
+            <tr>
+              <td><strong>#IB-<%= row.id %></strong></td>
+              <td>
+                <div style="font-weight: 700; color: #0f172a;"><%= row.full_name %></div>
+                <div style="font-size: 0.8rem; color: #64748b;"><%= row.student_id_number %></div>
+                <div style="font-size: 0.75rem; color: #94a3b8;"><%= row.email %></div>
+              </td>
+              <td>
+                <div style="font-weight: 700; color: #0f172a;"><%= row.title %></div>
+                <div style="font-size: 0.8rem; color: #64748b;">by <%= row.author %></div>
+                <div style="font-size: 0.75rem; color: #94a3b8;">ISBN: <%= row.isbn %></div>
+              </td>
+              <td><%= row.due_date_formatted ? new Date(row.issue_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '' %></td>
+              <td>
+                <strong><%= row.due_date_formatted ? new Date(row.due_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '' %></strong>
+                <% if (row.is_overdue) { %>
+                  <div style="color: #ef4444; font-size: 0.78rem; font-weight: 700;">
+                    <%= row.days_overdue %> days overdue
+                  </div>
+                <% } %>
+              </td>
+              <td>
+                <% if (row.return_date) { %>
+                  <%= new Date(row.return_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) %>
+                <% } else { %>
+                  <span style="color: #94a3b8;">Pending</span>
+                <% } %>
+              </td>
+              <td>
+                <% if (!isActive) { %>
+                  <span class="badge badge-neutral">Returned</span>
+                <% } else if (row.is_overdue) { %>
+                  <span class="badge badge-danger">Overdue</span>
+                <% } else { %>
+                  <span class="badge badge-success">Active Loan</span>
+                <% } %>
+              </td>
+              <td>
+                <% if (fineVal > 0) { %>
+                  <strong style="color: #ef4444;">₹<%= fineVal.toFixed(2) %></strong>
+                <% } else { %>
+                  <span style="color: #10b981;">₹0.00</span>
+                <% } %>
+              </td>
+              <td>
+                <% if (isActive) { %>
+                  <a href="/admin/circulation/return/<%= row.id %>" class="btn btn-sm btn-primary">
+                    Process Return
+                  </a>
+                <% } else { %>
+                  <span style="color: #94a3b8; font-size: 0.85rem;">Completed</span>
+                <% } %>
+              </td>
+            </tr>
+          <% }); %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer', { isAppLayout: true }) %>

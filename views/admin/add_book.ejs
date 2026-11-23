@@ -1,0 +1,153 @@
+<%- include('../partials/header', {
+  pageTitle: 'Add New Book',
+  headerTitle: 'Register New Library Volume',
+  headerSubtitle: 'Add academic textbooks, lab manuals, and monographs to library inventory',
+  isAppLayout: true,
+  currentPage: 'add_book'
+}) %>
+
+<div class="content-card" style="max-width: 820px; margin: 0 auto;">
+  <div class="card-header">
+    <h2>Book Registration Form</h2>
+    <a href="/admin/books" class="btn btn-sm btn-secondary">&larr; Back to Catalog</a>
+  </div>
+
+  <div class="card-body">
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger"><%= error %></div>
+    <% } %>
+
+    <form method="POST" action="/admin/books" enctype="multipart/form-data">
+      <div class="form-group">
+        <label class="form-label" for="title">Book Title <span class="required">*</span></label>
+        <input 
+          type="text" 
+          id="title" 
+          name="title" 
+          class="form-control" 
+          placeholder="e.g., Introduction to Algorithms" 
+          value="<%= typeof form !== 'undefined' && form.title ? form.title : '' %>" 
+          required 
+          autofocus
+        >
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="author">Author(s) <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="author" 
+            name="author" 
+            class="form-control" 
+            placeholder="e.g., Cormen, Leiserson, Rivest, Stein" 
+            value="<%= typeof form !== 'undefined' && form.author ? form.author : '' %>" 
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="category_id">Academic Department / Category <span class="required">*</span></label>
+          <select id="category_id" name="category_id" class="form-control" required>
+            <option value="0">-- Select Department --</option>
+            <% categories.forEach(function(cat) { %>
+              <option value="<%= cat.id %>" <%= (typeof form !== 'undefined' && form.category_id == cat.id) ? 'selected' : '' %>>
+                <%= cat.name %>
+              </option>
+            <% }); %>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="isbn">ISBN (International Standard Book Number) <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="isbn" 
+            name="isbn" 
+            class="form-control" 
+            placeholder="e.g., 978-0262033848" 
+            value="<%= typeof form !== 'undefined' && form.isbn ? form.isbn : '' %>" 
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="publisher">Publisher</label>
+          <input 
+            type="text" 
+            id="publisher" 
+            name="publisher" 
+            class="form-control" 
+            placeholder="e.g., MIT Press" 
+            value="<%= typeof form !== 'undefined' && form.publisher ? form.publisher : '' %>"
+          >
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="publication_year">Publication Year</label>
+          <input 
+            type="number" 
+            id="publication_year" 
+            name="publication_year" 
+            class="form-control" 
+            min="1900" 
+            max="<%= new Date().getFullYear() + 1 %>" 
+            value="<%= typeof form !== 'undefined' && form.publication_year ? form.publication_year : new Date().getFullYear() %>"
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="total_copies">Physical Copies in Stock <span class="required">*</span></label>
+          <input 
+            type="number" 
+            id="total_copies" 
+            name="total_copies" 
+            class="form-control" 
+            min="1" 
+            value="<%= typeof form !== 'undefined' && form.total_copies ? form.total_copies : 1 %>" 
+            required
+          >
+          <small class="form-text" style="color: #64748b; font-size: 0.78rem;">Available copies will be initialized to this total.</small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="cover_image">Book Cover Image</label>
+        <input 
+          type="file" 
+          id="cover_image" 
+          name="cover_image" 
+          class="form-control" 
+          accept=".jpg,.jpeg,.png,.webp,.svg"
+        >
+        <small class="form-text" style="color: #64748b; font-size: 0.78rem;">Supported formats: JPG, PNG, WEBP, SVG (max 5MB). Defaults to system cover icon.</small>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="description">Book Description &amp; Syllabus Synopsis</label>
+        <textarea 
+          id="description" 
+          name="description" 
+          class="form-control" 
+          rows="4" 
+          placeholder="Brief description or course syllabus alignment..."
+        ><%= typeof form !== 'undefined' && form.description ? form.description : '' %></textarea>
+      </div>
+
+      <div style="display: flex; gap: 12px; margin-top: 24px;">
+        <button type="submit" class="btn btn-primary" style="padding: 12px 24px;">
+          Save and Add to Catalog &rarr;
+        </button>
+        <a href="/admin/books" class="btn btn-secondary" style="padding: 12px 24px;">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer', { isAppLayout: true }) %>

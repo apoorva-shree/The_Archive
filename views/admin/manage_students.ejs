@@ -1,0 +1,114 @@
+<%- include('../partials/header', {
+  pageTitle: 'Manage Students',
+  headerTitle: 'Student Accounts Management',
+  headerSubtitle: 'View registered students, circulation privileges, and account status',
+  isAppLayout: true,
+  currentPage: 'manage_students'
+}) %>
+
+<!-- Search Bar -->
+<div class="filter-bar">
+  <form method="GET" action="/admin/students" style="display: flex; gap: 12px; width: 100%; flex-wrap: wrap;">
+    <div class="filter-input">
+      <input 
+        type="text" 
+        name="search" 
+        class="form-control" 
+        placeholder="Search by student name, roll ID, or email..." 
+        value="<%= typeof search !== 'undefined' ? search : '' %>"
+      >
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      Search Students
+    </button>
+
+    <% if (typeof search !== 'undefined' && search) { %>
+      <a href="/admin/students" class="btn btn-secondary">Reset</a>
+    <% } %>
+  </form>
+</div>
+
+<!-- Student Table -->
+<div class="content-card">
+  <div class="card-header">
+    <h2>Registered Students (<%= students.length %> Total)</h2>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Student Details</th>
+          <th>Student / Roll ID</th>
+          <th>Contact</th>
+          <th>Active Loans</th>
+          <th>Pending Requests</th>
+          <th>Registered On</th>
+          <th>Status</th>
+          <th>Account Control</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (students.length === 0) { %>
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 40px; color: #64748b;">
+              No student records matched the specified search criteria.
+            </td>
+          </tr>
+        <% } else { %>
+          <% students.forEach(function(s) { %>
+            <% 
+              const regDate = s.created_at ? new Date(s.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+            %>
+            <tr>
+              <td>
+                <div style="font-weight: 700; color: #0f172a;"><%= s.full_name %></div>
+                <div style="font-size: 0.82rem; color: #64748b;"><%= s.email %></div>
+              </td>
+              <td><code><%= s.student_id_number || 'N/A' %></code></td>
+              <td><%= s.phone || 'N/A' %></td>
+              <td>
+                <% if (s.active_issues > 0) { %>
+                  <span class="badge badge-warning"><%= s.active_issues %> Book(s) Held</span>
+                <% } else { %>
+                  <span class="badge badge-neutral">0 Active</span>
+                <% } %>
+              </td>
+              <td>
+                <% if (s.pending_requests > 0) { %>
+                  <span class="badge badge-info"><%= s.pending_requests %> Pending</span>
+                <% } else { %>
+                  <span style="color: #94a3b8; font-size: 0.85rem;">None</span>
+                <% } %>
+              </td>
+              <td><%= regDate %></td>
+              <td>
+                <% if (s.status === 'active') { %>
+                  <span class="badge badge-success">Active</span>
+                <% } else { %>
+                  <span class="badge badge-danger">Deactivated</span>
+                <% } %>
+              </td>
+              <td>
+                <form method="POST" action="/admin/students/<%= s.id %>/toggle-status" style="display: inline;">
+                  <% if (s.status === 'active') { %>
+                    <button type="submit" class="btn btn-sm btn-outline" style="color: #ef4444; border-color: #fca5a5;" onclick="return confirm('Suspend library privileges for this student?');">
+                      Deactivate
+                    </button>
+                  <% } else { %>
+                    <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Reactivate library access for this student?');">
+                      Activate
+                    </button>
+                  <% } %>
+                </form>
+              </td>
+            </tr>
+          <% }); %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer', { isAppLayout: true }) %>

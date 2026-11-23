@@ -67,12 +67,10 @@ router.get('/admin/transactions', requireAdmin, async (req, res) => {
       });
     }
 
-    return res.status(200).json({
-      status: 'ok',
-      count: formattedList.length,
+    res.render('admin/transactions', {
+      transactions: formattedList,
       actionFilter,
-      search,
-      transactions: formattedList
+      search
     });
   } catch (error) {
     console.error('Error fetching transactions ledger:', error);

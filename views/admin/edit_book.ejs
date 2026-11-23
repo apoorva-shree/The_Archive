@@ -1,0 +1,159 @@
+<%- include('../partials/header', {
+  pageTitle: 'Edit Book: ' + book.title,
+  headerTitle: 'Edit Library Book Record',
+  headerSubtitle: 'Update catalog details, ISBN, and adjust physical volume stock',
+  isAppLayout: true,
+  currentPage: 'manage_books'
+}) %>
+
+<div class="content-card" style="max-width: 820px; margin: 0 auto;">
+  <div class="card-header">
+    <h2>Editing: <%= book.title %></h2>
+    <a href="/admin/books" class="btn btn-sm btn-secondary">&larr; Back to Catalog</a>
+  </div>
+
+  <div class="card-body">
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger"><%= error %></div>
+    <% } %>
+
+    <form method="POST" action="/admin/books/<%= book.id %>/edit" enctype="multipart/form-data">
+      <div class="form-group">
+        <label class="form-label" for="title">Book Title <span class="required">*</span></label>
+        <input 
+          type="text" 
+          id="title" 
+          name="title" 
+          class="form-control" 
+          value="<%= book.title %>" 
+          required 
+          autofocus
+        >
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="author">Author(s) <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="author" 
+            name="author" 
+            class="form-control" 
+            value="<%= book.author %>" 
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="category_id">Academic Department / Category <span class="required">*</span></label>
+          <select id="category_id" name="category_id" class="form-control" required>
+            <% categories.forEach(function(cat) { %>
+              <option value="<%= cat.id %>" <%= (book.category_id == cat.id) ? 'selected' : '' %>>
+                <%= cat.name %>
+              </option>
+            <% }); %>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="isbn">ISBN <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="isbn" 
+            name="isbn" 
+            class="form-control" 
+            value="<%= book.isbn %>" 
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="publisher">Publisher</label>
+          <input 
+            type="text" 
+            id="publisher" 
+            name="publisher" 
+            class="form-control" 
+            value="<%= book.publisher || '' %>"
+          >
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="publication_year">Publication Year</label>
+          <input 
+            type="number" 
+            id="publication_year" 
+            name="publication_year" 
+            class="form-control" 
+            min="1900" 
+            max="<%= new Date().getFullYear() + 1 %>" 
+            value="<%= book.publication_year %>"
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="total_copies">Total Physical Copies <span class="required">*</span></label>
+          <input 
+            type="number" 
+            id="total_copies" 
+            name="total_copies" 
+            class="form-control" 
+            min="1" 
+            value="<%= book.total_copies %>" 
+            required
+          >
+          <small class="form-text" style="color: #64748b; font-size: 0.78rem;">Currently available on shelves: <%= book.available_copies %> copies.</small>
+        </div>
+      </div>
+
+      <!-- Current Cover Preview & Update -->
+      <div class="form-group">
+        <label class="form-label">Cover Image</label>
+        <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 8px;">
+          <% 
+            let coverPath = '/assets/images/covers/default_book.svg';
+            if (book.cover_image) {
+              coverPath = '/assets/images/covers/' + book.cover_image;
+            }
+          %>
+          <img src="<%= coverPath %>" alt="Cover" style="width: 50px; height: 70px; object-fit: cover; border-radius: 4px; border: 1px solid #cbd5e1;">
+          <div style="flex: 1;">
+            <input 
+              type="file" 
+              id="cover_image" 
+              name="cover_image" 
+              class="form-control" 
+              accept=".jpg,.jpeg,.png,.webp,.svg"
+            >
+            <small class="form-text" style="color: #64748b; font-size: 0.78rem;">Upload new cover image to replace current cover.</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="description">Book Description &amp; Synopsis</label>
+        <textarea 
+          id="description" 
+          name="description" 
+          class="form-control" 
+          rows="4"
+        ><%= book.description || '' %></textarea>
+      </div>
+
+      <div style="display: flex; gap: 12px; margin-top: 24px;">
+        <button type="submit" class="btn btn-primary" style="padding: 12px 24px;">
+          Update Book Record &rarr;
+        </button>
+        <a href="/admin/books" class="btn btn-secondary" style="padding: 12px 24px;">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer', { isAppLayout: true }) %>

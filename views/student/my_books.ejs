@@ -1,0 +1,109 @@
+<%- include('../partials/header', {
+  pageTitle: 'My Borrowed Books',
+  headerTitle: 'My Active Borrowed Books',
+  headerSubtitle: 'Track your active book issues, return deadlines, and overdue fine status',
+  isAppLayout: true,
+  currentPage: 'my_books'
+}) %>
+
+<!-- Information Alert -->
+<div class="alert alert-info">
+  <div>
+    <strong>Library Circulation Policy:</strong>
+    Standard loan duration is <strong>14 days</strong>. 
+    Books must be returned physically at the central library desk. Overdue books incur a fee of 
+    <strong>₹5.00 per day</strong>.
+  </div>
+</div>
+
+<% if (totalActiveFines > 0) { %>
+  <div class="alert alert-danger">
+    <strong>Overdue Notice:</strong> You currently have an accumulated overdue fine of 
+    <strong>₹<%= totalActiveFines.toFixed(2) %></strong>. 
+    Please return your overdue books immediately to prevent further fine accrual.
+  </div>
+<% } %>
+
+<div class="content-card">
+  <div class="card-header">
+    <h2>Active Book Loans (<%= activeLoans.length %>)</h2>
+    <a href="/student/books" class="btn btn-sm btn-primary">+ Borrow Another Book</a>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Cover</th>
+          <th>Book Title &amp; Details</th>
+          <th>Category</th>
+          <th>Issue Date</th>
+          <th>Due Date</th>
+          <th>Loan Status</th>
+          <th>Accrued Fine</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (activeLoans.length === 0) { %>
+          <tr>
+            <td colspan="7" style="text-align: center; padding: 48px; color: #64748b;">
+              <div style="font-size: 2rem; margin-bottom: 8px;">&#128218;</div>
+              <p>You have no books currently on loan.</p>
+              <a href="/student/books" class="btn btn-primary btn-sm" style="margin-top: 10px;">Browse Catalog</a>
+            </td>
+          </tr>
+        <% } else { %>
+          <% activeLoans.forEach(function(loan) { %>
+            <% 
+              let coverSrc = '/assets/images/covers/default_book.svg';
+              if (loan.cover_image) {
+                coverSrc = '/assets/images/covers/' + loan.cover_image;
+              }
+              const daysLeft = Math.ceil((new Date(loan.due_date).getTime() - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+            %>
+            <tr>
+              <td style="width: 50px;">
+                <img src="<%= coverSrc %>" alt="Cover" style="width: 44px; height: 60px; object-fit: cover; border-radius: 4px;">
+              </td>
+              <td>
+                <div style="font-weight: 700; color: #0f172a;"><%= loan.title %></div>
+                <div style="font-size: 0.8rem; color: #64748b;">by <%= loan.author %></div>
+                <div style="font-size: 0.75rem; color: #94a3b8;">ISBN: <%= loan.isbn %></div>
+              </td>
+              <td><span class="badge badge-neutral"><%= loan.category_name %></span></td>
+              <td><%= new Date(loan.issue_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) %></td>
+              <td>
+                <div style="font-weight: 700;"><%= new Date(loan.due_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) %></div>
+                <% if (loan.is_overdue) { %>
+                  <div style="color: #ef4444; font-size: 0.78rem; font-weight: 700;">
+                    <%= loan.days_overdue %> days past due!
+                  </div>
+                <% } else { %>
+                  <div style="color: #10b981; font-size: 0.78rem;">
+                    <%= daysLeft %> days remaining
+                  </div>
+                <% } %>
+              </td>
+              <td>
+                <% if (loan.is_overdue) { %>
+                  <span class="badge badge-danger">Overdue</span>
+                <% } else { %>
+                  <span class="badge badge-success">Active Loan</span>
+                <% } %>
+              </td>
+              <td>
+                <% if (loan.is_overdue) { %>
+                  <strong style="color: #ef4444; font-size: 0.95rem;">₹<%= (loan.accrued_fine || 0).toFixed(2) %></strong>
+                  <div style="font-size: 0.72rem; color: #94a3b8;">₹5.00/day</div>
+                <% } else { %>
+                  <span style="color: #10b981; font-weight: 600;">₹0.00</span>
+                <% } %>
+              </td>
+            </tr>
+          <% }); %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer', { isAppLayout: true }) %>

@@ -1,0 +1,128 @@
+<%- include('../partials/header', {
+  pageTitle: 'Process Book Return: ' + issue.title,
+  headerTitle: 'Process Book Return',
+  headerSubtitle: 'Record physical copy check-in, calculate fines, and restore library inventory',
+  isAppLayout: true,
+  currentPage: 'issued_books'
+}) %>
+
+<div class="content-card" style="max-width: 760px; margin: 0 auto;">
+  <div class="card-header">
+    <h2>Return Clearance &amp; Fine Summary (#IB-<%= issue.id %>)</h2>
+    <a href="/admin/circulation/issued" class="btn btn-sm btn-secondary">&larr; Back to Circulation</a>
+  </div>
+
+  <div class="card-body">
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger"><%= error %></div>
+    <% } %>
+
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; background: var(--bg-subtle); padding: 20px; border-radius: var(--radius-sm); margin-bottom: 24px;">
+      <div>
+        <div style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Student Information</div>
+        <div style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-top: 4px;"><%= issue.full_name %></div>
+        <div style="font-size: 0.85rem; color: #64748b;"><%= issue.student_id_number %> &bull; <%= issue.email %></div>
+        <% if (issue.phone) { %>
+          <div style="font-size: 0.85rem; color: #64748b;">Phone: <%= issue.phone %></div>
+        <% } %>
+      </div>
+
+      <div>
+        <div style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Book Information</div>
+        <div style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-top: 4px;"><%= issue.title %></div>
+        <div style="font-size: 0.85rem; color: #64748b;">by <%= issue.author %></div>
+        <div style="font-size: 0.85rem; color: #64748b;">ISBN: <code><%= issue.isbn %></code></div>
+      </div>
+    </div>
+
+    <!-- Loan Timeline & Overdue Computation -->
+    <div style="border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 20px; margin-bottom: 24px;">
+      <h3 style="font-size: 1rem; margin-bottom: 14px; color: #0f172a;">Circulation Audit Timeline</h3>
+
+      <% 
+        const issueFormatted = issue.issue_date ? new Date(issue.issue_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+        const dueFormatted = issue.due_date ? new Date(issue.due_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+        const todayFormatted = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      %>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; text-align: center;">
+        <div style="background: #f8fafc; padding: 12px; border-radius: 6px;">
+          <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase;">Issue Date</div>
+          <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-top: 2px;">
+            <%= issueFormatted %>
+          </div>
+        </div>
+
+        <div style="background: #f8fafc; padding: 12px; border-radius: 6px;">
+          <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase;">Scheduled Due Date</div>
+          <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-top: 2px;">
+            <%= dueFormatted %>
+          </div>
+        </div>
+
+        <div style="background: #eff6ff; padding: 12px; border-radius: 6px; border: 1px solid #bfdbfe;">
+          <div style="font-size: 0.75rem; color: #1e3a8a; text-transform: uppercase;">Actual Return Date</div>
+          <div style="font-size: 0.95rem; font-weight: 700; color: #2563eb; margin-top: 2px;">
+            <%= todayFormatted %> (Today)
+          </div>
+        </div>
+      </div>
+
+      <!-- Fine Calculation Box -->
+      <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <div style="font-weight: 700; color: #0f172a;">
+            <% if (days_overdue > 0) { %>
+              <span style="color: #ef4444;">&#9888; Overdue by <%= days_overdue %> Days</span>
+            <% } else { %>
+              <span style="color: #10b981;">&#10003; Returned On Time</span>
+            <% } %>
+          </div>
+          <div style="font-size: 0.82rem; color: #64748b;">
+            Fine Rule: ₹5.00 per calendar day past scheduled due date.
+          </div>
+        </div>
+
+        <div style="text-align: right;">
+          <div style="font-size: 0.75rem; text-transform: uppercase; color: #64748b;">Total Overdue Fine</div>
+          <div style="font-size: 1.6rem; font-weight: 800; color: <%= fine_amount > 0 ? '#ef4444' : '#10b981' %>;">
+            ₹<%= fine_amount.toFixed(2) %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirmation Form -->
+    <form method="POST" action="/admin/circulation/return/<%= issue.id %>">
+      <% if (fine_amount > 0) { %>
+        <div class="form-group" style="background: #fffbeb; border: 1px solid #fde68a; padding: 14px 18px; border-radius: 6px;">
+          <label style="display: flex; align-items: center; gap: 10px; font-weight: 600; color: #92400e; cursor: pointer;">
+            <input type="checkbox" name="fine_collected" value="1" checked style="width: 18px; height: 18px;">
+            Fine of ₹<%= fine_amount.toFixed(2) %> collected from student at library desk.
+          </label>
+        </div>
+      <% } %>
+
+      <div class="form-group">
+        <label class="form-label" for="return_notes">Return Condition / Librarian Remarks</label>
+        <input 
+          type="text" 
+          id="return_notes" 
+          name="return_notes" 
+          class="form-control" 
+          placeholder="e.g., Book inspected, physical condition good, copy restored to shelf."
+        >
+      </div>
+
+      <div style="display: flex; gap: 12px; margin-top: 24px;">
+        <button type="submit" class="btn btn-primary" style="padding: 11px 24px;">
+          Confirm Check-In &amp; Restore Inventory
+        </button>
+        <a href="/admin/circulation/issued" class="btn btn-secondary" style="padding: 11px 24px;">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer', { isAppLayout: true }) %>

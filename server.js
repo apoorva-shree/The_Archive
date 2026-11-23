@@ -36,9 +36,55 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 app.use(sessionMiddleware);
 app.use(flashMiddleware);
 
+// Sidebar badge count and user locals middleware
+app.use(async (req, res, next) => {
+  res.locals.currentUser = (req.session && req.session.user) ? req.session.user : null;
+  res.locals.pendingRequestsCount = 0;
+  res.locals.overdueCount = 0;
+
+  if (req.session && req.session.user) {
+    try {
+      if (req.session.user.role === 'admin') {
+        const [pRows] = await pool.query("SELECT COUNT(*) AS cnt FROM borrow_requests WHERE status = 'pending'");
+        const [oRows] = await pool.query("SELECT COUNT(*) AS cnt FROM issued_books WHERE status IN ('issued', 'overdue') AND due_date < CURDATE()");
+        res.locals.pendingRequestsCount = pRows[0]?.cnt || 0;
+        res.locals.overdueCount = oRows[0]?.cnt || 0;
+      } else if (req.session.user.role === 'student') {
+        const [oRows] = await pool.query("SELECT COUNT(*) AS cnt FROM issued_books WHERE user_id = ? AND status IN ('issued', 'overdue') AND due_date < CURDATE()", [req.session.user.id]);
+        res.locals.overdueCount = oRows[0]?.cnt || 0;
+      }
+    } catch (e) {
+      console.error('Sidebar badge count error:', e);
+    }
+  }
+  next();
+});
+
 // Preserve and serve existing static assets
 // Accessible at /assets/css/style.css, /assets/images/covers/..., etc.
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
+
+// Legacy PHP compatibility redirects to avoid broken or dead links
+app.get('/login.php', (req, res) => res.redirect('/login'));
+app.get('/register.php', (req, res) => res.redirect('/register'));
+app.get('/logout.php', (req, res) => res.redirect('/logout'));
+app.get('/admin/dashboard.php', (req, res) => res.redirect('/admin/dashboard'));
+app.get('/admin/manage_books.php', (req, res) => res.redirect('/admin/books'));
+app.get('/admin/add_book.php', (req, res) => res.redirect('/admin/books/add'));
+app.get('/admin/edit_book.php', (req, res) => res.redirect(req.query.id ? `/admin/books/${req.query.id}/edit` : '/admin/books'));
+app.get('/admin/borrow_requests.php', (req, res) => res.redirect('/admin/borrow-requests' + (req.query.status ? `?status=${req.query.status}` : '')));
+app.get('/admin/issued_books.php', (req, res) => res.redirect('/admin/circulation/issued' + (req.query.status ? `?status=${req.query.status}` : '')));
+app.get('/admin/issue_book.php', (req, res) => res.redirect('/admin/circulation/issue'));
+app.get('/admin/return_book.php', (req, res) => res.redirect(req.query.id ? `/admin/circulation/return/${req.query.id}` : '/admin/circulation/issued'));
+app.get('/admin/overdue_books.php', (req, res) => res.redirect('/admin/circulation/overdue'));
+app.get('/admin/transactions.php', (req, res) => res.redirect('/admin/transactions'));
+app.get('/admin/manage_students.php', (req, res) => res.redirect('/admin/students'));
+app.get('/student/dashboard.php', (req, res) => res.redirect('/student/dashboard'));
+app.get('/student/books.php', (req, res) => res.redirect('/student/books' + (req.query.category ? `?category=${req.query.category}` : '')));
+app.get('/student/book_details.php', (req, res) => res.redirect(req.query.id ? `/student/books/${req.query.id}` : '/student/books'));
+app.get('/student/my_books.php', (req, res) => res.redirect('/student/my-loans'));
+app.get('/student/borrow_history.php', (req, res) => res.redirect('/student/loan-history'));
+app.get('/student/profile.php', (req, res) => res.redirect('/student/profile'));
 
 // Mount Authentication Routes
 app.use('/', authRoutes);

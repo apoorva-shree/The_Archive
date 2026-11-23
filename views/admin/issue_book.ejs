@@ -1,0 +1,90 @@
+<%- include('../partials/header', {
+  pageTitle: 'Issue Book to Student',
+  headerTitle: 'Direct Book Circulation Desk',
+  headerSubtitle: 'Issue a library volume directly to an active registered student',
+  isAppLayout: true,
+  currentPage: 'issued_books'
+}) %>
+
+<div class="content-card" style="max-width: 700px; margin: 0 auto;">
+  <div class="card-header">
+    <h2>Issue Book Form</h2>
+    <a href="/admin/circulation/issued" class="btn btn-sm btn-secondary">&larr; Back to Issued Books</a>
+  </div>
+
+  <div class="card-body">
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger"><%= error %></div>
+    <% } %>
+
+    <form method="POST" action="/admin/circulation/issue">
+      <div class="form-group">
+        <label class="form-label" for="user_id">Select Registered Student <span class="required">*</span></label>
+        <select id="user_id" name="user_id" class="form-control" required>
+          <option value="0">-- Choose Student --</option>
+          <% students.forEach(function(stu) { %>
+            <option value="<%= stu.id %>" <%= (typeof selectedUserId !== 'undefined' && selectedUserId === stu.id) ? 'selected' : '' %>>
+              <%= stu.full_name %> (ID: <%= stu.student_id_number || 'N/A' %>) - <%= stu.email %>
+            </option>
+          <% }); %>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="book_id">Select Available Book <span class="required">*</span></label>
+        <select id="book_id" name="book_id" class="form-control" required>
+          <option value="0">-- Choose Book from Stock --</option>
+          <% books.forEach(function(bk) { %>
+            <option value="<%= bk.id %>" <%= (typeof selectedBookId !== 'undefined' && selectedBookId === bk.id) ? 'selected' : '' %>>
+              <%= bk.title %> (by <%= bk.author %>) - <%= bk.available_copies %> copies available
+            </option>
+          <% }); %>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="loan_days">Loan Duration (Days) <span class="required">*</span></label>
+          <input 
+            type="number" 
+            id="loan_days" 
+            name="loan_days" 
+            class="form-control" 
+            min="1" 
+            max="90" 
+            value="<%= typeof loanDays !== 'undefined' ? loanDays : 14 %>" 
+            required
+          >
+          <div class="form-help">Standard loan period is 14 days.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Calculated Return Due Date</label>
+          <%
+            const defaultDueDate = new Date();
+            defaultDueDate.setDate(defaultDueDate.getDate() + 14);
+            const dueFormatted = defaultDueDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+          %>
+          <input 
+            type="text" 
+            class="form-control" 
+            value="<%= dueFormatted %>" 
+            disabled 
+            style="background: #f1f5f9;"
+          >
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px; margin-top: 24px;">
+        <button type="submit" class="btn btn-primary" style="padding: 11px 24px;">
+          Confirm &amp; Issue Book
+        </button>
+        <a href="/admin/circulation/issued" class="btn btn-secondary" style="padding: 11px 24px;">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer', { isAppLayout: true }) %>
