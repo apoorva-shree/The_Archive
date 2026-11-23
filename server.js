@@ -12,6 +12,12 @@ const flashMiddleware = require('./src/middleware/flash');
 // Phase 3: Authentication Routes (Login, Register, Logout, Dashboards)
 const authRoutes = require('./src/routes/auth');
 
+// Phase 4: Library Management Core Routes
+const booksRoutes = require('./src/routes/books');
+const borrowRoutes = require('./src/routes/borrow');
+const circulationRoutes = require('./src/routes/circulation');
+const transactionsRoutes = require('./src/routes/transactions');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -36,6 +42,12 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 // Mount Authentication Routes
 app.use('/', authRoutes);
+
+// Mount Phase 4 Library Routes (Books, Borrow Requests, Circulation, Transactions)
+app.use('/', booksRoutes);
+app.use('/', borrowRoutes);
+app.use('/', circulationRoutes);
+app.use('/', transactionsRoutes);
 
 // Phase 1 Baseline Health Check Route
 app.get('/health', (req, res) => {

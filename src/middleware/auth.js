@@ -9,9 +9,16 @@
  * - redirectIfLoggedIn: Prevents logged-in users from seeing /login or /register.
  */
 
+function wantsJson(req) {
+  return Boolean(req.xhr || (req.headers.accept && req.headers.accept.includes('application/json')) || req.query.format === 'json');
+}
+
 // Restrict access to logged-in users
 function requireLogin(req, res, next) {
   if (!req.session || !req.session.user) {
+    if (wantsJson(req)) {
+      return res.status(401).json({ status: 'error', message: 'Please log in to access this page.' });
+    }
     if (res.redirectWithFlash) {
       return res.redirectWithFlash('/login', 'error', 'Please log in to access this page.');
     }
@@ -23,6 +30,9 @@ function requireLogin(req, res, next) {
 // Restrict access to Administrator accounts only
 function requireAdmin(req, res, next) {
   if (!req.session || !req.session.user) {
+    if (wantsJson(req)) {
+      return res.status(401).json({ status: 'error', message: 'Please log in to access this page.' });
+    }
     if (res.redirectWithFlash) {
       return res.redirectWithFlash('/login', 'error', 'Please log in to access this page.');
     }
@@ -30,6 +40,9 @@ function requireAdmin(req, res, next) {
   }
 
   if (req.session.user.role !== 'admin') {
+    if (wantsJson(req)) {
+      return res.status(403).json({ status: 'error', message: 'Unauthorized access! Administrator privileges required.' });
+    }
     if (res.redirectWithFlash) {
       return res.redirectWithFlash('/student/dashboard', 'error', 'Unauthorized access! Administrator privileges required.');
     }
@@ -42,6 +55,9 @@ function requireAdmin(req, res, next) {
 // Restrict access to Student accounts only
 function requireStudent(req, res, next) {
   if (!req.session || !req.session.user) {
+    if (wantsJson(req)) {
+      return res.status(401).json({ status: 'error', message: 'Please log in to access this page.' });
+    }
     if (res.redirectWithFlash) {
       return res.redirectWithFlash('/login', 'error', 'Please log in to access this page.');
     }
@@ -49,6 +65,9 @@ function requireStudent(req, res, next) {
   }
 
   if (req.session.user.role !== 'student') {
+    if (wantsJson(req)) {
+      return res.status(403).json({ status: 'error', message: 'Access restricted to student accounts.' });
+    }
     if (res.redirectWithFlash) {
       return res.redirectWithFlash('/admin/dashboard', 'error', 'Access restricted to student accounts.');
     }
