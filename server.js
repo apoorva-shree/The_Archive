@@ -20,6 +20,9 @@ app.use(express.json());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+// Ignore favicon requests so browser background checks do not touch session store
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 // Mount Session and Flash Middleware
 app.use(sessionMiddleware);
 app.use(flashMiddleware);
@@ -85,11 +88,17 @@ app.get('/test/session', (req, res) => {
 // Step 3.1: Flash Message Test - Part 1 (Set message & redirect)
 app.get('/test/flash-set', (req, res) => {
   req.setFlash('success', 'Test flash message: Registration successful! (One-time alert)');
-  res.redirect('/test/flash-get');
+  // Await session write to MySQL before sending 302 redirect header
+  req.session.save((err) => {
+    if (err) console.error('Session save error:', err);
+    res.redirect('/test/flash-get');
+  });
 });
 
 // Step 3.1: Flash Message Test - Part 2 (Display message & auto-clear)
 app.get('/test/flash-get', (req, res) => {
+  // Prevent browser caching on this dynamic test endpoint
+  res.set('Cache-Control', 'no-store');
   res.status(200).json({
     status: 'ok',
     message: 'Flash message received from session (matches PHP get_flash() behavior)',
