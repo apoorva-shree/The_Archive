@@ -12,6 +12,12 @@ const MySQLStore = require('express-mysql-session')(session);
 const { pool } = require('./db');
 require('dotenv').config();
 
+// Enforce mandatory SESSION_SECRET environment variable
+if (!process.env.SESSION_SECRET) {
+  console.error('[FATAL ERROR]: SESSION_SECRET environment variable is required. Please configure SESSION_SECRET in your .env file.');
+  throw new Error('SESSION_SECRET environment variable is required.');
+}
+
 // Configure MySQL Session Store using existing connection pool
 const sessionStore = new MySQLStore({
   clearExpired: true,
@@ -31,7 +37,7 @@ const sessionStore = new MySQLStore({
 // Configure Express Session Middleware
 const sessionMiddleware = session({
   key: 'the_archive_sid',
-  secret: process.env.SESSION_SECRET || 'the_archive_secret_key_iiit_kota',
+  secret: process.env.SESSION_SECRET,
   store: sessionStore,
   resave: false,             // Do not save session back to store if unmodified
   saveUninitialized: false,  // Do not create session until something is stored
