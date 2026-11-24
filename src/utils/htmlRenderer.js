@@ -6,6 +6,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { FINE_PER_DAY } = require('./circulation');
 
 const VIEWS_DIR = path.resolve(__dirname, '../../views');
 
@@ -505,6 +506,7 @@ function buildLandingPageData(data, currentUser) {
       available_copies_count: (stats.available_copies_count || 0).toLocaleString(),
       members_count: (stats.members_count || 0).toLocaleString()
     },
+    FINE_PER_DAY: (typeof data.FINE_PER_DAY !== 'undefined' ? data.FINE_PER_DAY : Number(FINE_PER_DAY).toFixed(2)),
     heroPreviewLink,
     categoryCards,
     featuredBooksCards,
