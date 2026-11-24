@@ -8,6 +8,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const { pool } = require('../config/db');
 const { requireLogin, requireAdmin, requireStudent, redirectIfLoggedIn } = require('../middleware/auth');
+const { renderView } = require('../utils/htmlRenderer');
 
 // GET / and /index.php - Public Landing Page
 const renderLandingPage = async (req, res) => {
@@ -39,7 +40,7 @@ const renderLandingPage = async (req, res) => {
       LIMIT 8
     `);
 
-    res.render('index', {
+    return renderView(req, res, 'index', {
       stats,
       categories,
       featured_books
@@ -60,7 +61,7 @@ router.get('/login', redirectIfLoggedIn, (req, res) => {
     notice = 'You have been successfully signed out.';
   }
 
-  res.render('login', {
+  return renderView(req, res, 'login', {
     page_title: 'Account Login',
     email_input: '',
     error: '',
@@ -74,7 +75,7 @@ router.post('/login', redirectIfLoggedIn, async (req, res) => {
   const password = req.body.password || '';
 
   if (!email || !password) {
-    return res.render('login', {
+    return renderView(req, res, 'login', {
       page_title: 'Account Login',
       email_input: email,
       error: 'Please enter both your email address and password.',
@@ -85,7 +86,7 @@ router.post('/login', redirectIfLoggedIn, async (req, res) => {
   // Basic email syntax check
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
-    return res.render('login', {
+    return renderView(req, res, 'login', {
       page_title: 'Account Login',
       email_input: email,
       error: 'Please enter a valid email address.',
@@ -98,7 +99,7 @@ router.post('/login', redirectIfLoggedIn, async (req, res) => {
     const [rows] = await pool.query('SELECT * FROM users WHERE email = ? LIMIT 1', [email]);
 
     if (rows.length === 0) {
-      return res.render('login', {
+      return renderView(req, res, 'login', {
         page_title: 'Account Login',
         email_input: email,
         error: 'No registered user account found with that email address.',
@@ -110,7 +111,7 @@ router.post('/login', redirectIfLoggedIn, async (req, res) => {
 
     // 2. Check active status
     if (user.status !== 'active') {
-      return res.render('login', {
+      return renderView(req, res, 'login', {
         page_title: 'Account Login',
         email_input: email,
         error: 'Your account has been deactivated. Please contact the administrator.',
@@ -122,7 +123,7 @@ router.post('/login', redirectIfLoggedIn, async (req, res) => {
     const passwordValid = await bcrypt.compare(password, user.password);
 
     if (!passwordValid) {
-      return res.render('login', {
+      return renderView(req, res, 'login', {
         page_title: 'Account Login',
         email_input: email,
         error: 'Invalid credentials. The password you entered is incorrect.',
@@ -134,7 +135,7 @@ router.post('/login', redirectIfLoggedIn, async (req, res) => {
     req.session.regenerate((err) => {
       if (err) {
         console.error('Session regeneration error:', err);
-        return res.render('login', {
+        return renderView(req, res, 'login', {
           page_title: 'Account Login',
           email_input: email,
           error: 'An internal session error occurred. Please try again.',
@@ -157,7 +158,7 @@ router.post('/login', redirectIfLoggedIn, async (req, res) => {
 
   } catch (error) {
     console.error('Login database error:', error);
-    return res.render('login', {
+    return renderView(req, res, 'login', {
       page_title: 'Account Login',
       email_input: email,
       error: 'Database connection error. Please try again later.',
@@ -168,7 +169,7 @@ router.post('/login', redirectIfLoggedIn, async (req, res) => {
 
 // GET /register - Show registration page
 router.get('/register', redirectIfLoggedIn, (req, res) => {
-  res.render('register', {
+  return renderView(req, res, 'register', {
     page_title: 'Student Registration',
     form_data: { full_name: '', student_id: '', email: '', phone: '' },
     error: ''
@@ -189,7 +190,7 @@ router.post('/register', redirectIfLoggedIn, async (req, res) => {
   // Validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!fullName || !studentId || !email || !password || !confirmPassword) {
-    return res.render('register', {
+    return renderView(req, res, 'register', {
       page_title: 'Student Registration',
       form_data: formData,
       error: 'Please fill in all mandatory fields.'
@@ -197,7 +198,7 @@ router.post('/register', redirectIfLoggedIn, async (req, res) => {
   }
 
   if (!emailRegex.test(email)) {
-    return res.render('register', {
+    return renderView(req, res, 'register', {
       page_title: 'Student Registration',
       form_data: formData,
       error: 'Please enter a valid email address.'
@@ -205,7 +206,7 @@ router.post('/register', redirectIfLoggedIn, async (req, res) => {
   }
 
   if (password.length < 6) {
-    return res.render('register', {
+    return renderView(req, res, 'register', {
       page_title: 'Student Registration',
       form_data: formData,
       error: 'Password must be at least 6 characters long.'
@@ -213,7 +214,7 @@ router.post('/register', redirectIfLoggedIn, async (req, res) => {
   }
 
   if (password !== confirmPassword) {
-    return res.render('register', {
+    return renderView(req, res, 'register', {
       page_title: 'Student Registration',
       form_data: formData,
       error: 'Passwords do not match. Please verify and retype.'
@@ -224,7 +225,7 @@ router.post('/register', redirectIfLoggedIn, async (req, res) => {
     // Check if email already registered
     const [existingEmail] = await pool.query('SELECT id FROM users WHERE email = ? LIMIT 1', [email]);
     if (existingEmail.length > 0) {
-      return res.render('register', {
+      return renderView(req, res, 'register', {
         page_title: 'Student Registration',
         form_data: formData,
         error: 'An account with this email address is already registered.'
@@ -234,7 +235,7 @@ router.post('/register', redirectIfLoggedIn, async (req, res) => {
     // Check if Student ID already registered (case-insensitive normalized check)
     const [existingStudentId] = await pool.query('SELECT id FROM users WHERE UPPER(student_id_number) = ? LIMIT 1', [studentId]);
     if (existingStudentId.length > 0) {
-      return res.render('register', {
+      return renderView(req, res, 'register', {
         page_title: 'Student Registration',
         form_data: formData,
         error: 'A student with this Roll / Student ID Number is already registered.'
@@ -257,7 +258,7 @@ router.post('/register', redirectIfLoggedIn, async (req, res) => {
 
   } catch (error) {
     console.error('Registration database error:', error);
-    return res.render('register', {
+    return renderView(req, res, 'register', {
       page_title: 'Student Registration',
       form_data: formData,
       error: 'Registration failed due to a database error. Please try again.'
@@ -331,7 +332,7 @@ router.get('/admin/dashboard', requireAdmin, async (req, res) => {
       LIMIT 5
     `);
 
-    res.render('admin/dashboard', {
+    return renderView(req, res, 'admin/dashboard', {
       stats,
       recent_requests,
       recent_issued
@@ -392,7 +393,7 @@ router.get('/student/dashboard', requireStudent, async (req, res) => {
       LIMIT 5
     `, [userId]);
 
-    res.render('student/dashboard', {
+    return renderView(req, res, 'student/dashboard', {
       metrics,
       active_books,
       my_requests
@@ -413,7 +414,7 @@ router.get('/student/profile', requireStudent, async (req, res) => {
       return res.redirect('/login');
     }
 
-    res.render('student/profile', {
+    return renderView(req, res, 'student/profile', {
       profile: rows[0],
       error: '',
       formType: ''
@@ -441,7 +442,7 @@ router.post('/student/profile', requireStudent, async (req, res) => {
       const phone = (req.body.phone || '').trim();
 
       if (!fullName) {
-        return res.render('student/profile', {
+        return renderView(req, res, 'student/profile', {
           profile,
           error: 'Full name cannot be left blank.',
           formType: 'profile'
@@ -467,7 +468,7 @@ router.post('/student/profile', requireStudent, async (req, res) => {
       const confirmPassword = req.body.confirm_password || '';
 
       if (!currentPassword || !newPassword || !confirmPassword) {
-        return res.render('student/profile', {
+        return renderView(req, res, 'student/profile', {
           profile,
           error: 'Please fill in all password fields.',
           formType: 'password'
@@ -476,7 +477,7 @@ router.post('/student/profile', requireStudent, async (req, res) => {
 
       const isMatch = await bcrypt.compare(currentPassword, profile.password);
       if (!isMatch) {
-        return res.render('student/profile', {
+        return renderView(req, res, 'student/profile', {
           profile,
           error: 'Current password is incorrect.',
           formType: 'password'
@@ -484,7 +485,7 @@ router.post('/student/profile', requireStudent, async (req, res) => {
       }
 
       if (newPassword.length < 6) {
-        return res.render('student/profile', {
+        return renderView(req, res, 'student/profile', {
           profile,
           error: 'New password must be at least 6 characters long.',
           formType: 'password'
@@ -492,7 +493,7 @@ router.post('/student/profile', requireStudent, async (req, res) => {
       }
 
       if (newPassword !== confirmPassword) {
-        return res.render('student/profile', {
+        return renderView(req, res, 'student/profile', {
           profile,
           error: 'New password and confirmation password do not match.',
           formType: 'password'
@@ -544,7 +545,7 @@ router.get('/admin/students', requireAdmin, async (req, res) => {
       return res.status(200).json({ status: 'ok', count: students.length, search, students });
     }
 
-    res.render('admin/manage_students', {
+    return renderView(req, res, 'admin/manage_students', {
       students,
       search
     });

@@ -9,6 +9,7 @@ const { pool } = require('../config/db');
 const { requireLogin, requireAdmin, requireStudent } = require('../middleware/auth');
 const uploadCover = require('../config/upload');
 const { respondOrRedirect } = require('../utils/circulation');
+const { renderView } = require('../utils/htmlRenderer');
 
 // Helper to fetch filtered catalog
 async function fetchCatalog(search, categoryFilter) {
@@ -70,9 +71,9 @@ router.get('/books', async (req, res) => {
     }
 
     if (req.session && req.session.user && req.session.user.role === 'admin') {
-      return res.render('admin/manage_books', { books, categories, search, categoryFilter });
+      return renderView(req, res, 'admin/manage_books', { books, categories, search, categoryFilter });
     }
-    return res.render('student/books', { books, categories, search, categoryFilter });
+    return renderView(req, res, 'student/books', { books, categories, search, categoryFilter });
   } catch (error) {
     console.error('Error fetching books:', error);
     res.status(500).json({ status: 'error', message: 'Database error while searching catalog.' });
@@ -92,7 +93,7 @@ router.get('/admin/books', requireAdmin, async (req, res) => {
       return res.status(200).json({ status: 'ok', count: books.length, search, categoryFilter, books, categories });
     }
 
-    res.render('admin/manage_books', { books, categories, search, categoryFilter });
+    return renderView(req, res, 'admin/manage_books', { books, categories, search, categoryFilter });
   } catch (error) {
     console.error('Error loading admin books:', error);
     res.status(500).send('Database error loading books management.');
@@ -103,7 +104,7 @@ router.get('/admin/books', requireAdmin, async (req, res) => {
 router.get('/admin/books/add', requireAdmin, async (req, res) => {
   try {
     const [categories] = await pool.query('SELECT * FROM categories ORDER BY name ASC');
-    res.render('admin/add_book', { categories, form: {}, error: '' });
+    return renderView(req, res, 'admin/add_book', { categories, form: {}, error: '' });
   } catch (error) {
     console.error('Error loading add book form:', error);
     res.status(500).send('Database error loading add book form.');
@@ -123,7 +124,7 @@ router.get('/admin/books/:id/edit', requireAdmin, async (req, res) => {
       return res.redirect('/admin/books');
     }
     const [categories] = await pool.query('SELECT * FROM categories ORDER BY name ASC');
-    res.render('admin/edit_book', { book: rows[0], categories, error: '' });
+    return renderView(req, res, 'admin/edit_book', { book: rows[0], categories, error: '' });
   } catch (error) {
     console.error('Error loading edit book form:', error);
     res.status(500).send('Database error loading edit book form.');
@@ -143,7 +144,7 @@ router.get('/student/books', requireStudent, async (req, res) => {
       return res.status(200).json({ status: 'ok', count: books.length, search, categoryFilter, books, categories });
     }
 
-    res.render('student/books', { books, categories, search, categoryFilter });
+    return renderView(req, res, 'student/books', { books, categories, search, categoryFilter });
   } catch (error) {
     console.error('Error loading student books:', error);
     res.status(500).send('Database error loading books catalog.');
@@ -206,7 +207,7 @@ router.get('/student/books/:id', requireStudent, async (req, res) => {
       return res.status(200).json({ status: 'ok', book: result.book, userBorrowStatus: result.userBorrowStatus });
     }
 
-    res.render('student/book_details', { book: result.book, userBorrowStatus: result.userBorrowStatus });
+    return renderView(req, res, 'student/book_details', { book: result.book, userBorrowStatus: result.userBorrowStatus });
   } catch (error) {
     console.error('Error fetching student book details:', error);
     res.status(500).send('Database error fetching book details.');
@@ -237,7 +238,7 @@ router.get('/books/:id', async (req, res) => {
       });
     }
 
-    res.render('student/book_details', { book: result.book, userBorrowStatus: result.userBorrowStatus });
+    return renderView(req, res, 'student/book_details', { book: result.book, userBorrowStatus: result.userBorrowStatus });
   } catch (error) {
     console.error('Error fetching book details:', error);
     res.status(500).json({ status: 'error', message: 'Database error fetching book details.' });

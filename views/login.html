@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= page_title %> - The Archive</title>
+  <title>{{page_title}} - The Archive</title>
   <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
@@ -29,29 +29,9 @@
       &bull; <strong>Student:</strong> <code>rahul.sharma@college.edu</code> / <code>student123</code>
     </div>
 
-    <% if (typeof notice !== 'undefined' && notice) { %>
-      <div class="alert alert-success">
-        <%= notice %>
-      </div>
-    <% } %>
-
-    <% if (typeof error !== 'undefined' && error) { %>
-      <div class="alert alert-danger">
-        <%= error %>
-      </div>
-    <% } %>
-
-    <% if (typeof flash !== 'undefined' && flash && flash.error) { %>
-      <div class="alert alert-danger">
-        <%= flash.error %>
-      </div>
-    <% } %>
-
-    <% if (typeof flash !== 'undefined' && flash && flash.success) { %>
-      <div class="alert alert-success">
-        <%= flash.success %>
-      </div>
-    <% } %>
+    {{{noticeAlert}}}
+    {{{errorAlert}}}
+    {{{flashAlerts}}}
 
     <form method="POST" action="/login" autocomplete="off">
       <div class="form-group">
@@ -62,7 +42,7 @@
           name="email" 
           class="form-control" 
           placeholder="e.g., student@college.edu" 
-          value="<%= typeof email_input !== 'undefined' ? email_input : '' %>" 
+          value="{{email_input}}" 
           required 
           autofocus
         >

@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { pool } = require('../config/db');
 const { requireAdmin } = require('../middleware/auth');
+const { renderView } = require('../utils/htmlRenderer');
 
 /**
  * GET /admin/transactions
@@ -67,7 +68,7 @@ router.get('/admin/transactions', requireAdmin, async (req, res) => {
       });
     }
 
-    res.render('admin/transactions', {
+    return renderView(req, res, 'admin/transactions', {
       transactions: formattedList,
       actionFilter,
       search

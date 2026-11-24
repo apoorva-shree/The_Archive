@@ -1,0 +1,36 @@
+<!-- Information Alert -->
+<div class="alert alert-info">
+  <div>
+    <strong>Library Circulation Policy:</strong>
+    Standard loan duration is <strong>14 days</strong>. 
+    Books must be returned physically at the central library desk. Overdue books incur a fee of 
+    <strong>₹5.00 per day</strong>.
+  </div>
+</div>
+
+{{{overdueNotice}}}
+
+<div class="content-card">
+  <div class="card-header">
+    <h2>Active Book Loans ({{activeLoansCount}})</h2>
+    <a href="/student/books" class="btn btn-sm btn-primary">+ Borrow Another Book</a>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Cover</th>
+          <th>Book Title &amp; Details</th>
+          <th>Category</th>
+          <th>Issue Date</th>
+          <th>Due Date</th>
+          <th>Loan Status</th>
+          <th>Accrued Fine</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{{activeLoansRows}}}
+      </tbody>
+    </table>
+  </div>
+</div>

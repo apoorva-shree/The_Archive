@@ -1,0 +1,49 @@
+<!-- Filter & Search Bar -->
+<div class="filter-bar">
+  <form method="GET" action="/admin/transactions" style="display: flex; gap: 12px; width: 100%; flex-wrap: wrap; align-items: center;">
+    <div class="filter-select">
+      <select name="action" class="form-control">
+        <option value="all">All Action Types</option>
+        {{{actionOptions}}}
+      </select>
+    </div>
+
+    <div class="filter-input">
+      <input 
+        type="text" 
+        name="search" 
+        class="form-control" 
+        placeholder="Search by student, book, or keywords..." 
+        value="{{search}}"
+      >
+    </div>
+
+    <button type="submit" class="btn btn-primary">Filter Ledger</button>
+
+    {{{resetFilterBtn}}}
+  </form>
+</div>
+
+<!-- Transactions Table -->
+<div class="content-card">
+  <div class="card-header">
+    <h2>Audit History ({{transactionsCount}} Events Logged)</h2>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Log ID</th>
+          <th>Timestamp</th>
+          <th>Student Details</th>
+          <th>Book Information</th>
+          <th>Circulation Action</th>
+          <th>Audit Remarks / Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{{transactionRows}}}
+      </tbody>
+    </table>
+  </div>
+</div>

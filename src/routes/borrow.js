@@ -8,6 +8,7 @@ const router = express.Router();
 const { pool } = require('../config/db');
 const { requireLogin, requireAdmin, requireStudent } = require('../middleware/auth');
 const { LOAN_PERIOD_DAYS, logTransaction, respondOrRedirect } = require('../utils/circulation');
+const { renderView } = require('../utils/htmlRenderer');
 
 /**
  * POST /student/borrow-requests
@@ -195,7 +196,7 @@ router.get('/admin/borrow-requests', requireAdmin, async (req, res) => {
       });
     }
 
-    res.render('admin/borrow_requests', {
+    return renderView(req, res, 'admin/borrow_requests', {
       requests,
       statusFilter
     });

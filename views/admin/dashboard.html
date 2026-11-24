@@ -1,0 +1,128 @@
+<!-- Statistics Overview Cards -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-card-icon icon-blue">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+    </div>
+    <div class="stat-card-data">
+      <h3>{{stats.total_copies}}</h3>
+      <p>Total Book Volumes ({{stats.total_titles}} Titles)</p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card-icon icon-emerald">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    </div>
+    <div class="stat-card-data">
+      <h3>{{stats.available_copies}}</h3>
+      <p>Available on Shelves</p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card-icon icon-purple">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+    </div>
+    <div class="stat-card-data">
+      <h3>{{stats.total_students}}</h3>
+      <p>Registered Students</p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card-icon icon-blue">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line></svg>
+    </div>
+    <div class="stat-card-data">
+      <h3>{{stats.currently_issued}}</h3>
+      <p>Books Currently on Loan</p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card-icon icon-rose">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+    </div>
+    <div class="stat-card-data">
+      <h3>{{stats.overdue_count}}</h3>
+      <p>Overdue Books Pending Return</p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card-icon icon-amber">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+    </div>
+    <div class="stat-card-data">
+      <h3>{{stats.pending_requests}}</h3>
+      <p>Pending Borrow Requests</p>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Action Shortcuts Bar -->
+<div class="content-card" style="margin-bottom: 24px;">
+  <div class="card-header">
+    <h2>Administrative Quick Actions</h2>
+  </div>
+  <div class="card-body" style="display: flex; gap: 12px; flex-wrap: wrap;">
+    <a href="/admin/books/add" class="btn btn-success">+ Add New Book</a>
+    <a href="/admin/circulation/issue" class="btn btn-primary">+ Issue Book Directly</a>
+    <a href="/admin/borrow-requests" class="btn btn-warning">Manage Borrow Requests ({{stats.pending_requests}})</a>
+    <a href="/admin/circulation/overdue" class="btn btn-danger">Overdue Tracker ({{stats.overdue_count}})</a>
+    <a href="/admin/books" class="btn btn-secondary">Catalog Management</a>
+    <a href="/admin/students" class="btn btn-secondary">Student Accounts</a>
+    <a href="/admin/transactions" class="btn btn-secondary">Audit Ledger</a>
+  </div>
+</div>
+
+<!-- Two-Column Grid: Recent Requests & Recent Issues -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 24px;">
+  <!-- Pending Borrow Requests -->
+  <div class="content-card">
+    <div class="card-header">
+      <h2>Recent Borrow Requests ({{recentRequestsCount}} Pending)</h2>
+      <a href="/admin/borrow-requests" class="btn btn-sm btn-secondary">View All &rarr;</a>
+    </div>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Book Title</th>
+            <th>Stock</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{{recentRequestsRows}}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Recently Issued Books -->
+  <div class="content-card">
+    <div class="card-header">
+      <h2>Active Circulation ({{recentIssuedCount}} Recent)</h2>
+      <a href="/admin/circulation/issued" class="btn btn-sm btn-secondary">View All &rarr;</a>
+    </div>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Book Title</th>
+            <th>Issue Date</th>
+            <th>Due Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{{recentIssuedRows}}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

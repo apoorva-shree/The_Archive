@@ -14,6 +14,7 @@ const {
   logTransaction,
   respondOrRedirect
 } = require('../utils/circulation');
+const { renderView } = require('../utils/htmlRenderer');
 
 /**
  * POST /admin/circulation/issue
@@ -216,7 +217,7 @@ router.get('/admin/circulation/issued', requireAdmin, async (req, res) => {
       });
     }
 
-    res.render('admin/issued_books', {
+    return renderView(req, res, 'admin/issued_books', {
       issued: issuedList,
       statusFilter,
       search
@@ -243,7 +244,7 @@ router.get('/admin/circulation/issue', requireAdmin, async (req, res) => {
       'SELECT id, title, author, isbn, available_copies, total_copies FROM books WHERE available_copies > 0 ORDER BY title ASC'
     );
 
-    res.render('admin/issue_book', {
+    return renderView(req, res, 'admin/issue_book', {
       students,
       books,
       selectedUserId,
@@ -315,7 +316,7 @@ router.get('/admin/circulation/overdue', requireAdmin, async (req, res) => {
       return res.status(200).json(responseData);
     }
 
-    res.render('admin/overdue_books', responseData);
+    return renderView(req, res, 'admin/overdue_books', responseData);
   } catch (error) {
     console.error('Error fetching overdue books:', error);
     return res.status(500).json({ status: 'error', message: 'Database error fetching overdue books.' });
@@ -361,7 +362,7 @@ router.get('/admin/circulation/return/:id', requireAdmin, async (req, res) => {
     const dueDateStr = issue.due_date ? (issue.due_date.toISOString ? issue.due_date.toISOString().substring(0, 10) : String(issue.due_date).substring(0, 10)) : null;
     const calc = calculateOverdueAndFine(dueDateStr, null);
 
-    res.render('admin/return_book', {
+    return renderView(req, res, 'admin/return_book', {
       issue,
       days_overdue: calc.daysOverdue,
       fine_amount: calc.fineAmount,
@@ -528,7 +529,7 @@ router.get('/student/my-loans', requireStudent, async (req, res) => {
       return res.status(200).json(responseData);
     }
 
-    res.render('student/my_books', responseData);
+    return renderView(req, res, 'student/my_books', responseData);
   } catch (error) {
     console.error('Error fetching student active loans:', error);
     return res.status(500).json({ status: 'error', message: 'Database error fetching active loans.' });
@@ -577,7 +578,7 @@ router.get('/student/loan-history', requireStudent, async (req, res) => {
       return res.status(200).json(responseData);
     }
 
-    res.render('student/borrow_history', responseData);
+    return renderView(req, res, 'student/borrow_history', responseData);
   } catch (error) {
     console.error('Error fetching student loan history:', error);
     return res.status(500).json({ status: 'error', message: 'Database error fetching loan history.' });

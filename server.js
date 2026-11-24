@@ -25,10 +25,6 @@ const PORT = process.env.PORT || 3000;
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Set up EJS template engine
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-
 // Ignore favicon requests so browser background checks do not touch session store
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 

@@ -1,0 +1,92 @@
+<!-- Student Metrics Grid -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-card-icon icon-blue">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+    </div>
+    <div class="stat-card-data">
+      <h3>{{metrics.active_loans_count}}</h3>
+      <p>Books Currently Borrowed</p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card-icon icon-amber">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+    </div>
+    <div class="stat-card-data">
+      <h3>{{metrics.pending_requests_count}}</h3>
+      <p>Pending Borrow Requests</p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card-icon icon-emerald">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    </div>
+    <div class="stat-card-data">
+      <h3>{{metrics.returned_count}}</h3>
+      <p>Books Returned (Completed)</p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card-icon icon-rose">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+    </div>
+    <div class="stat-card-data">
+      <h3>{{metrics.overdue_count}}</h3>
+      <p>Overdue Books</p>
+    </div>
+  </div>
+</div>
+
+<!-- Active Borrowed Books Table -->
+<div class="content-card">
+  <div class="card-header">
+    <h2>My Active Book Loans ({{activeLoansCount}})</h2>
+    <a href="/student/books" class="btn btn-sm btn-primary">+ Borrow Another Book</a>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Cover</th>
+          <th>Book Title &amp; Details</th>
+          <th>Category</th>
+          <th>Issue Date</th>
+          <th>Due Date</th>
+          <th>Status</th>
+          <th>Days Left</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{{activeBooksRows}}}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Recent Borrow Requests -->
+<div class="content-card">
+  <div class="card-header">
+    <h2>Recent Borrow Requests ({{myRequestsCount}})</h2>
+    <a href="/student/loan-history" class="btn btn-sm btn-secondary">Full Request Log &rarr;</a>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Request ID</th>
+          <th>Book Title &amp; Author</th>
+          <th>Submission Date</th>
+          <th>Status</th>
+          <th>Remarks</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{{myRequestsRows}}}
+      </tbody>
+    </table>
+  </div>
+</div>
