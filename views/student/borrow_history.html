@@ -1,0 +1,50 @@
+<!-- Past Returned Loans -->
+<div class="content-card">
+  <div class="card-header">
+    <h2>Returned Books History ({{pastLoansCount}} Total)</h2>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Issue ID</th>
+          <th>Book Title &amp; Author</th>
+          <th>Category</th>
+          <th>Issue Date</th>
+          <th>Due Date</th>
+          <th>Return Date</th>
+          <th>Status</th>
+          <th>Fine Paid</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{{pastLoansRows}}}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- All Requests History -->
+<div class="content-card">
+  <div class="card-header">
+    <h2>All Borrow Requests ({{requestsHistoryCount}} Total)</h2>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Request ID</th>
+          <th>Book Title</th>
+          <th>Author</th>
+          <th>ISBN</th>
+          <th>Request Date</th>
+          <th>Status</th>
+          <th>Administrator Remarks</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{{requestsHistoryRows}}}
+      </tbody>
+    </table>
+  </div>
+</div>

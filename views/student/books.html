@@ -1,0 +1,37 @@
+<!-- Search and Filter Bar -->
+<div class="filter-bar">
+  <form method="GET" action="/student/books" style="display: flex; gap: 12px; width: 100%; flex-wrap: wrap;">
+    <div class="filter-input">
+      <input 
+        type="text" 
+        name="search" 
+        class="form-control" 
+        placeholder="Search books by title, author, or ISBN..." 
+        value="{{search}}"
+      >
+    </div>
+
+    <div class="filter-select">
+      <select name="category" class="form-control">
+        <option value="0">All Disciplines &amp; Categories</option>
+        {{{categoryOptions}}}
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      Search Books
+    </button>
+
+    {{{resetFilterBtn}}}
+  </form>
+</div>
+
+<!-- Catalog Results Grid -->
+<div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+  <span style="font-weight: 600; color: #64748b; font-size: 0.9rem;">
+    Showing {{booksCount}} book title(s)
+  </span>
+</div>
+
+{{{booksGridContent}}}

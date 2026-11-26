@@ -1,0 +1,47 @@
+<!-- Search Bar -->
+<div class="filter-bar">
+  <form method="GET" action="/admin/students" style="display: flex; gap: 12px; width: 100%; flex-wrap: wrap;">
+    <div class="filter-input">
+      <input 
+        type="text" 
+        name="search" 
+        class="form-control" 
+        placeholder="Search by student name, roll ID, or email..." 
+        value="{{search}}"
+      >
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      Search Students
+    </button>
+
+    {{{resetFilterBtn}}}
+  </form>
+</div>
+
+<!-- Student Table -->
+<div class="content-card">
+  <div class="card-header">
+    <h2>Registered Students ({{studentsCount}} Total)</h2>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Student Details</th>
+          <th>Student / Roll ID</th>
+          <th>Contact</th>
+          <th>Active Loans</th>
+          <th>Pending Requests</th>
+          <th>Registered On</th>
+          <th>Status</th>
+          <th>Account Control</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{{studentRows}}}
+      </tbody>
+    </table>
+  </div>
+</div>

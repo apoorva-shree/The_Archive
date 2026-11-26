@@ -1,0 +1,69 @@
+<!-- Overdue Analytics Cards -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-card-icon icon-rose">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+    </div>
+    <div class="stat-card-data">
+      <h3>{{metrics.totalOverdueCount}}</h3>
+      <p>Overdue Books on Loan</p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card-icon icon-amber">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+    </div>
+    <div class="stat-card-data">
+      <h3>₹{{metrics.totalFinesAccumulated}}</h3>
+      <p>Total Accumulated Fines</p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card-icon icon-blue">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+    </div>
+    <div class="stat-card-data">
+      <h3>{{metrics.maxDaysOverdue}} Days</h3>
+      <p>Longest Overdue Delay</p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card-icon icon-emerald">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    </div>
+    <div class="stat-card-data">
+      <h3>₹{{metrics.dailyFineRate}}</h3>
+      <p>Daily Overdue Fine Rate</p>
+    </div>
+  </div>
+</div>
+
+<!-- Overdue Table -->
+<div class="content-card">
+  <div class="card-header">
+    <h2>Overdue Book Loans ({{overdueCount}} Total)</h2>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Issue ID</th>
+          <th>Student Details</th>
+          <th>Contact Info</th>
+          <th>Book Title &amp; ISBN</th>
+          <th>Issue Date</th>
+          <th>Due Date</th>
+          <th>Days Overdue</th>
+          <th>Accrued Fine</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{{overdueRows}}}
+      </tbody>
+    </table>
+  </div>
+</div>

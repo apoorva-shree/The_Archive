@@ -1,0 +1,65 @@
+<div class="content-card" style="max-width: 700px; margin: 0 auto;">
+  <div class="card-header">
+    <h2>Issue Book Form</h2>
+    <a href="/admin/circulation/issued" class="btn btn-sm btn-secondary">&larr; Back to Issued Books</a>
+  </div>
+
+  <div class="card-body">
+    {{{errorAlert}}}
+
+    <form method="POST" action="/admin/circulation/issue">
+      <div class="form-group">
+        <label class="form-label" for="user_id">Select Registered Student <span class="required">*</span></label>
+        <select id="user_id" name="user_id" class="form-control" required>
+          <option value="0">-- Choose Student --</option>
+          {{{studentOptions}}}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="book_id">Select Available Book <span class="required">*</span></label>
+        <select id="book_id" name="book_id" class="form-control" required>
+          <option value="0">-- Choose Book from Stock --</option>
+          {{{bookOptions}}}
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="loan_days">Loan Duration (Days) <span class="required">*</span></label>
+          <input 
+            type="number" 
+            id="loan_days" 
+            name="loan_days" 
+            class="form-control" 
+            min="1" 
+            max="90" 
+            value="{{loanDays}}" 
+            required
+          >
+          <div class="form-help">Standard loan period is 14 days.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Calculated Return Due Date</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            value="{{calculatedDueDateFormatted}}" 
+            disabled 
+            style="background: #f1f5f9;"
+          >
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px; margin-top: 24px;">
+        <button type="submit" class="btn btn-primary" style="padding: 11px 24px;">
+          Confirm &amp; Issue Book
+        </button>
+        <a href="/admin/circulation/issued" class="btn btn-secondary" style="padding: 11px 24px;">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>

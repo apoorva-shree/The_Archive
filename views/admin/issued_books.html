@@ -1,0 +1,52 @@
+<!-- Filter & Search Bar -->
+<div class="filter-bar">
+  <form method="GET" action="/admin/circulation/issued" style="display: flex; gap: 12px; width: 100%; flex-wrap: wrap; align-items: center;">
+    <div style="display: flex; gap: 6px;">
+      {{{filterTabs}}}
+    </div>
+
+    <div class="filter-input" style="max-width: 320px;">
+      <input 
+        type="text" 
+        name="search" 
+        class="form-control" 
+        placeholder="Search student or book title..." 
+        value="{{search}}"
+      >
+      <input type="hidden" name="status" value="{{statusFilter}}">
+    </div>
+
+    <button type="submit" class="btn btn-secondary">Search</button>
+
+    <div style="margin-left: auto;">
+      <a href="/admin/circulation/issue" class="btn btn-success">+ Issue Book Directly</a>
+    </div>
+  </form>
+</div>
+
+<!-- Issued Books Table -->
+<div class="content-card">
+  <div class="card-header">
+    <h2>Circulation Records ({{issuedCount}} Found)</h2>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Issue ID</th>
+          <th>Student Details</th>
+          <th>Book Title &amp; ISBN</th>
+          <th>Issue Date</th>
+          <th>Due Date</th>
+          <th>Return Date</th>
+          <th>Status</th>
+          <th>Fine</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{{issuedRows}}}
+      </tbody>
+    </table>
+  </div>
+</div>
