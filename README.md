@@ -1,825 +1,560 @@
 # The Archive | IIIT Kota Digital Library
 
-> **Where Learning Goes Beyond Classrooms.**  
+> **Where Learning Goes Beyond Classrooms.**<br/>
 > *Your gateway to knowledge, discovery, and academic excellence.*
 
-A centralized digital library management platform designed to modernize how students discover, access, borrow, and manage academic resources at **IIIT Kota**.
+A centralized, full-stack digital library management platform engineered to modernize how students discover, borrow, and manage academic resources at **Indian Institute of Information Technology (IIIT) Kota**.
 
-The Archive is a full-stack Library Management System developed to address the inefficiencies of traditional, manually managed library operations. It brings students, librarians, book inventory, borrowing requests, circulation records, and overdue tracking into one integrated platform.
+The Archive addresses the bottlenecks of traditional, paper-based, or fragmented library operations by bringing catalog discovery, student accounts, borrowing requests, circulation management, overdue fine tracking, and transaction audit trails into a unified web application.
 
-Built using **HTML5, CSS3, Core PHP, and MySQL**, the application provides separate student and administrator interfaces, automated circulation workflows, real-time inventory updates, fine calculations, and secure role-based access control.
+The application backend is built using **Node.js and Express.js** with **MySQL** for relational persistence and session storage. The presentation layer is implemented strictly in **pure semantic HTML5 and native CSS3** with **zero client-side JavaScript**, adhering to core web development standards, institutional branding, and server-side rendering principles.
 
 ---
 
 ## Table of Contents
 
-- [1. The Problem We're Solving](#1-the-problem-were-solving)
+- [1. Project Introduction](#1-project-introduction)
 - [2. Project Overview](#2-project-overview)
-- [3. Key Features](#3-key-features)
+- [3. Main Features](#3-main-features)
 - [4. Technology Stack](#4-technology-stack)
-- [5. System Architecture](#5-system-architecture)
-- [6. Database Design](#6-database-design)
-- [7. Core Application Workflows](#7-core-application-workflows)
-- [8. Security and Engineering Practices](#8-security-and-engineering-practices)
-- [9. Project Structure](#9-project-structure)
-- [10. Installation and Setup](#10-installation-and-setup)
-- [11. Demo Credentials](#11-demo-credentials)
-- [12. Technical Highlights](#12-technical-highlights)
-- [13. Future Scope](#13-future-scope)
+- [5. Project Folder Structure](#5-project-folder-structure)
+- [6. Prerequisites and Software Requirements](#6-prerequisites-and-software-requirements)
+- [7. Installation Instructions](#7-installation-instructions)
+- [8. Environment Variable Configuration](#8-environment-variable-configuration)
+- [9. MySQL Database Setup](#9-mysql-database-setup)
+- [10. How to Run the Project Locally](#10-how-to-run-the-project-locally)
+- [11. Available npm Commands](#11-available-npm-commands)
+- [12. Application Modules and Functionality](#12-application-modules-and-functionality)
+- [13. Authentication and Security Features](#13-authentication-and-security-features)
+- [14. Testing Instructions](#14-testing-instructions)
+- [15. Team Contribution Information](#15-team-contribution-information)
+- [16. Future Improvements](#16-future-improvements)
 
 ---
 
-## 1. The Problem We're Solving
+## 1. Project Introduction
 
-### The Challenge
+Academic libraries require seamless coordination between students seeking coursework materials and administrators managing physical inventory. When catalog management, borrowing records, and return deadlines are handled manually, institutions face inventory discrepancies, lost books, unrecorded fines, and delayed request processing.
 
-Traditional library management often involves disconnected processes and manual administrative work. Managing book inventories, tracking issued books, handling borrowing requests, and monitoring overdue returns can become increasingly difficult as the number of students and resources grows.
+**The Archive** bridges this gap through a high-performance web application tailored for the academic community at IIIT Kota. It provides:
 
-Some of the key challenges include:
-
-- **Fragmented Book Discovery:** Students may have to physically visit the library or depend on manual catalogues to find available books.
-- **Manual Circulation Management:** Tracking issued books, due dates, and returns manually increases administrative effort.
-- **Inventory Inconsistency:** Without centralized inventory tracking, maintaining accurate information about available and issued copies becomes difficult.
-- **Lack of Borrowing Transparency:** Students may not know whether their borrowing requests have been approved or rejected.
-- **Inefficient Overdue Tracking:** Identifying overdue books and calculating accumulated fines manually is time-consuming.
-- **Limited Administrative Visibility:** Librarians need a centralized view of inventory, student activity, pending requests, and circulation records.
-
-### The Solution: The Archive
-
-The Archive addresses these challenges through a centralized, database-driven library management system.
-
-Instead of treating book discovery, borrowing, issuing, and returning as separate activities, the platform connects them through a unified application.
-
-It provides:
-
-- A searchable digital catalogue for students.
-- An online borrowing request and approval system.
-- Centralized book inventory management.
-- Automated tracking of issue dates and return deadlines.
-- Overdue detection and fine calculation.
-- Administrative dashboards for monitoring library operations.
-- Transaction records for maintaining accountability.
-
-**The primary objective is to reduce manual administrative work, improve inventory accuracy, and make library resources more accessible and manageable.**
+- **Self-service catalog discovery:** Students can browse, search, and review available copies online from any device.
+- **Paperless borrowing workflows:** Students submit digital borrowing requests; administrators review, approve, or reject them with feedback.
+- **Accurate circulation tracking:** Real-time visibility into who holds each book, return deadlines, overdue statuses, and calculated fines.
+- **Institutional accountability:** A structured ledger records all critical circulation events.
 
 ---
 
 ## 2. Project Overview
 
-The Archive follows a role-based architecture with two primary user types.
+The Archive operates on a strict **Role-Based Access Control (RBAC)** model separating administrative operations from student activities:
 
-| User Role | Responsibilities |
-|---|---|
-| Administrator | Manages inventory, students, borrowing requests, book circulation, returns, fines, and transaction records. |
-| Student | Explores the catalogue, submits borrowing requests, tracks issued books, views borrowing history, and manages their profile. |
+| User Role | Responsibilities | Access Scope |
+|---|---|---|
+| **Administrator** | Manages catalog inventory, student accounts, review of borrow requests, manual book issuing, return clearance, fine calculations, and audit logs. | Full access to `/admin/*` routes and administrative actions. |
+| **Student** | Explores book collections, submits borrow requests, tracks active loans, monitors return due dates, reviews borrowing history, and manages personal profile details. | Access restricted to `/student/*` routes, public catalog, and self-profile. |
 
-### What Makes This Project Different?
+### Business Rules & Circulation Governance
 
-Rather than building a basic CRUD-based library website, The Archive implements actual library management workflows and business rules.
+The Archive enforces real-world library business constraints:
 
-For example:
-
-- A student cannot request a book if no copies are available.
-- Duplicate pending borrowing requests are prevented.
-- Students cannot request books they already hold.
-- Approving a request updates inventory and creates an active loan record.
-- Returning a book updates its availability and calculates applicable fines.
-- Administrative actions are recorded in a transaction history.
-
-These rules make the application more than a digital catalogue: they form the foundation of a functional library circulation system.
+1. **Inventory Stock Protection:** A student cannot request a book if `available_copies <= 0`.
+2. **Duplicate Request Prevention:** Students cannot submit multiple pending requests for the same title.
+3. **Active Loan Guard:** Students cannot request a book they already currently hold on an active loan.
+4. **Account Status Verification:** Deactivated or suspended student accounts are blocked from requesting or receiving books.
+5. **Atomic Stock Updates:** Approving a request or issuing a book decrements `available_copies`; returning a book increments it up to `total_copies`.
+6. **Automatic Overdue & Fine Math:** Fines accumulate daily once a loan passes its due date until the return is processed.
+7. **Safe Inventory Deletion:** Books with active loans or pending requests cannot be deleted from the database.
 
 ---
 
-## 3. Key Features
+## 3. Main Features
 
 ### A. Public Portal
+- **Institutional Landing Page:** Clean homepage featuring live dynamic statistics (total volumes, available copies, total titles, registered students).
+- **Curated Collections:** Quick category previews and featured book highlights.
+- **Dedicated Portals:** Separate, validated login (`/login`) and registration (`/register`) forms with flash notification alerts.
 
-- Modern landing page with IIIT Kota library branding.
-- Dynamic library statistics and featured book collections.
-- Academic category-based book discovery.
-- Responsive interface using native CSS.
-- Dedicated login and student registration pages.
-- Client-side and server-side form validation.
+### B. Student Dashboard & Self-Service
+- **Overview Dashboard:** Summary metric cards displaying active loans, pending requests, completed returns, and overdue alerts.
+- **Digital Book Catalogue:** Searchable by title, author, or ISBN, with department/category dropdown filtering.
+- **Book Details Page:** Detailed overview including publisher, publication year, description, cover image, and real-time copy availability badge.
+- **Digital Borrow Requests:** One-click borrowing submission with instant server-side validation.
+- **My Books (Active Loans):** Live tracking of borrowed books, issue date, due date, remaining loan days, overdue flags, and accumulated fine amounts.
+- **Borrowing History:** Archive of past approved/rejected requests and completed returns.
+- **Profile Management:** View registered student ID and academic email, update phone number and name, and securely change passwords.
 
-### B. Administrator Dashboard
-
-**1. Library Analytics**
-- Total book volumes.
-- Available book copies.
-- Registered students.
-- Currently issued books.
-- Overdue books.
-- Pending borrowing requests.
-- Recent circulation activity.
-
-**2. Inventory Management**
-- Add, edit, view, and delete books.
-- Search by title, author, and ISBN.
-- Filter books by category.
-- ISBN uniqueness validation.
-- Manage total and available copy counts.
-- Add book descriptions, syllabus summaries, and cover images.
-- Prevent deletion of books with active loans or pending requests.
-
-**3. Student Management**
-- View registered student accounts.
-- Access student IDs and contact information.
-- Monitor active loans and pending requests.
-- Suspend or reactivate borrowing privileges.
-
-**4. Circulation Management**
-- Review and approve/reject borrowing requests.
-- Provide remarks when rejecting requests.
-- Issue books directly from the administrative interface.
-- Track active and returned loans.
-- Process book returns and calculate fines.
-- Monitor overdue books and defaulters.
-- Maintain a permanent transaction history.
-
-### C. Student Dashboard
-
-**1. Personalized Dashboard**
-- Active borrowing count.
-- Pending borrowing requests.
-- Completed returns.
-- Overdue book count.
-- Upcoming return deadlines.
-
-**2. Digital Book Catalogue**
-- Browse the complete book collection.
-- Search by title, author, or ISBN.
-- Filter by academic category.
-- View real-time availability indicators.
-
-**3. Book Details and Borrowing**
-- View detailed book descriptions and syllabus information.
-- Check available copies.
-- Submit borrowing requests.
-- Receive request status updates.
-
-**4. My Books and Borrowing History**
-- Track currently borrowed books.
-- View issue dates and due dates.
-- Monitor remaining borrowing days.
-- Identify overdue books.
-- View applicable fines.
-- Access previous borrowing and return records.
-
-**5. Profile Management**
-- View personal and academic information.
-- Update name and contact number.
-- Change password with current-password verification.
+### C. Administrator Console
+- **Library Analytics Dashboard:** High-level metrics for total catalog volume, available stock, active loans, overdue books, registered students, and pending requests.
+- **Book Inventory Management:** Add, edit, view, and delete catalog entries with ISBN uniqueness checks, copy adjustment, and book cover image uploading via Multer (up to 5MB, `.jpg`, `.jpeg`, `.png`, `.webp`, `.svg`).
+- **Student Management:** Directory of registered students with contact info, current loan count, and one-click account activation/deactivation toggle.
+- **Borrow Request Processing:** Queue of pending student requests with options to approve (auto-issuing the book) or reject with explanatory notes.
+- **Direct Book Issuing:** Manual counter issue form allowing librarians to issue books directly to students with custom loan durations (default: 14 days).
+- **Return Processing & Fine Collection:** Return clearance console calculating days overdue and total fine at ₹5.00/day upon check-in.
+- **Overdue Books Tracker:** Filterable defaulter list highlighting overdue loans, borrower contact details, and accrued fines.
+- **Audit Transactions Ledger:** Searchable and filterable history of circulation events (`borrow_request`, `request_approved`, `request_rejected`, `book_issued`, `book_returned`).
 
 ---
 
 ## 4. Technology Stack
 
-The project deliberately uses fundamental web technologies instead of relying on frameworks, keeping the implementation transparent and demonstrating an understanding of core web development concepts.
+The Archive is built with an emphasis on web fundamentals, zero client-side dependencies, and clean server-side software engineering.
 
-| Layer | Technology | Purpose |
-|---|---|---|
-| Frontend | HTML5 | Semantic page structure and forms |
-| Styling | CSS3 | Responsive layouts, Grid, Flexbox, and UI design |
-| Backend | Core PHP | Application logic, authentication, and request processing |
-| Database | MySQL / MariaDB | Relational data storage and management |
-| Database Interface | MySQLi | Prepared statements and database operations |
-| Server | Apache | Local web server |
-| Development Environment | XAMPP | Local PHP and MySQL environment |
-| Version Control | Git & GitHub | Source code management |
+| Layer | Technology | Declared in `package.json` | Locked in `package-lock.json` | Purpose |
+|---|---|---|---|---|
+| **Backend Runtime** | Node.js | `>= 18.0.0` (Recommended) | Tested on v18+ / v20+ | Server environment executing backend logic |
+| **Web Framework** | Express.js | `^5.3.0` | `5.3.0` | Routing, middleware pipeline, static serving, and HTTP handling |
+| **Database** | MySQL / MariaDB | `5.7+` / `8.0+` | N/A (External Server) | Relational database with InnoDB engine and foreign keys |
+| **Database Client** | `mysql2` | `^3.24.6` | `3.24.6` | Asynchronous connection pooling and prepared statements (`mysql2/promise`) |
+| **Session Management** | `express-session` | `^1.19.0` | `1.19.0` | Server-side user session management |
+| **Session Persistence** | `express-mysql-session` | `^3.0.3` | `3.0.3` | MySQL-backed session storage (`sessions` table) persisting across restarts |
+| **Password Security** | `bcryptjs` | `^3.0.3` | `3.0.3` | Salt generation and one-way password hashing/verification |
+| **File Uploads** | `multer` | `^2.5.0` | `2.5.0` | Multipart form-data parser for book cover image uploads |
+| **Environment Config** | `dotenv` | `^18.0.10` | `18.0.10` | Secure environment variable loading from `.env` |
+| **Development Tooling** | `nodemon` | `^3.1.14` | `3.1.14` | Automatic development server restart on file edits |
+| **Frontend Presentation** | Semantic HTML5 | W3C Standard | W3C Standard | Page layouts, accessible forms, tables, and views |
+| **Frontend Styling** | Native CSS3 | Modern CSS | Modern CSS | Institutional theme (`#0f1b2d` Navy, `#FAF7F0` Ivory, `#c89b3c` Gold) |
+| **HTML Rendering** | Custom HTML Rendering System | Node.js `fs` | Native Node.js | Pure HTML template assembly (`src/utils/htmlRenderer.js`) with token escaping |
 
-**Design philosophy:**
-- No Bootstrap or Tailwind dependencies.
-- No external frontend frameworks.
-- No unnecessary backend frameworks.
-- Native CSS and PHP implementation.
-- No external CDN or remote font dependencies.
-- Inline SVG assets for interface icons.
+### Strict Frontend Engineering Principles:
+- **No EJS or External Template Compilers:** Views are authored as pure `.html` files in `views/` and populated via safe server-side token replacement.
+- **No Frontend JavaScript:** The client interface uses **zero browser JavaScript** (`<script>` tags are not used in views). All navigation, modal-less workflows, filters, and form submissions operate via standard HTTP GET and POST requests.
+- **No External UI Frameworks or CDNs:** No Bootstrap, Tailwind, jQuery, or external web fonts. Vector icons and book covers are bundled locally as SVGs and standard image formats.
 
 ---
 
-## 5. System Architecture
-
-The Archive follows a modular, server-rendered PHP architecture in which the frontend, application logic, authentication layer, and relational database work together.
-
-### High-Level Architecture
+## 5. Project Folder Structure
 
 ```text
-                 ┌─────────────────────────┐
-                 │       USER LAYER        │
-                 │                         │
-                 │    Student / Admin      │
-                 └────────────┬────────────┘
-                              │
-                              ▼
-                 ┌─────────────────────────┐
-                 │     PRESENTATION LAYER  │
-                 │                         │
-                 │       HTML5 + CSS3      │
-                 │   Dashboards / Forms    │
-                 │    Search / Catalogue   │
-                 └────────────┬────────────┘
-                              │
-                              ▼
-                 ┌─────────────────────────┐
-                 │     APPLICATION LAYER  │
-                 │                         │
-                 │         Core PHP        │
-                 │                         │
-                 │  Authentication         │
-                 │  Business Logic         │
-                 │  Request Processing     │
-                 │  Inventory Management   │
-                 │  Fine Calculation       │
-                 └────────────┬────────────┘
-                              │
-                              ▼
-                 ┌─────────────────────────┐
-                 │     ACCESS CONTROL      │
-                 │                         │
-                 │    Session Management   │
-                 │    Role-Based Guards    │
-                 └────────────┬────────────┘
-                              │
-                              ▼
-                 ┌─────────────────────────┐
-                 │      DATA ACCESS LAYER  │
-                 │                         │
-                 │     MySQLi / PHP        │
-                 │   Prepared Statements  │
-                 └────────────┬────────────┘
-                              │
-                              ▼
-                 ┌─────────────────────────┐
-                 │      DATABASE LAYER     │
-                 │                         │
-                 │         MySQL           │
-                 │      6 Relational       │
-                 │         Tables          │
-                 └─────────────────────────┘
+The_Archive/
+├── assets/
+│   ├── css/
+│   │   └── style.css                 # Custom responsive CSS3 stylesheet
+│   └── images/
+│       └── covers/                   # Book cover graphics (SVGs and user uploads)
+├── src/
+│   ├── config/
+│   │   ├── db.js                     # MySQL connection pool & health checker
+│   │   ├── session.js                # express-session configuration with MySQLStore
+│   │   └── upload.js                 # Multer storage and file filter for book covers
+│   ├── middleware/
+│   │   ├── auth.js                   # RBAC guards (requireLogin, requireAdmin, requireStudent)
+│   │   └── flash.js                  # One-time alert flash messages & view context
+│   ├── routes/
+│   │   ├── auth.js                   # Auth routes (login, register, logout, dashboards, profile)
+│   │   ├── books.js                  # Catalog search, book CRUD, category routes
+│   │   ├── borrow.js                 # Student borrow requests and admin approval/rejection
+│   │   ├── circulation.js            # Book issue, return clearance, and overdue tracking
+│   │   └── transactions.js           # Transaction audit ledger routes
+│   └── utils/
+│       ├── circulation.js            # Overdue math, fine calculations, transaction logging
+│       └── htmlRenderer.js           # Custom HTML rendering system with XSS escaping
+├── views/
+│   ├── admin/                        # Administrator HTML views
+│   │   ├── add_book.html             # Add new catalog title form
+│   │   ├── borrow_requests.html      # Pending requests review table
+│   │   ├── dashboard.html            # Admin metrics & recent activity
+│   │   ├── edit_book.html            # Edit catalog title form
+│   │   ├── issue_book.html           # Direct counter issue form
+│   │   ├── issued_books.html         # Active loans directory
+│   │   ├── manage_books.html         # Catalog management table
+│   │   ├── manage_students.html      # Student accounts directory
+│   │   ├── overdue_books.html        # Overdue defaulters list
+│   │   ├── return_book.html          # Return clearance & fine modal-less view
+│   │   └── transactions.html         # Audit ledger logs
+│   ├── partials/                     # Reusable HTML layout components
+│   │   ├── footer.html               # Institutional footer component
+│   │   ├── header.html               # Top navigation bar component
+│   │   └── sidebar.html              # Authenticated sidebar navigation component
+│   ├── student/                      # Student HTML views
+│   │   ├── book_details.html         # Detailed book view & borrow CTA
+│   │   ├── books.html                # Searchable digital catalog
+│   │   ├── borrow_history.html       # Archive of past loans and requests
+│   │   ├── dashboard.html            # Student overview and due dates
+│   │   ├── my_books.html             # Current active loans & fines
+│   │   └── profile.html              # Student profile & password settings
+│   ├── index.html                    # Public landing page
+│   ├── login.html                    # User login portal
+│   └── register.html                 # Student registration portal
+├── .env.example                      # Template for environment configuration
+├── .gitignore                        # Git ignore rules for node_modules, .env, etc.
+├── .keep                             # Empty keep file for tracking
+├── ARCHITECTURE_AND_SCHEMA.md       # Architectural & database specification document
+├── database.sql                      # Complete MySQL schema (6 tables), constraints & seed data
+├── package.json                      # Project dependencies and run scripts
+├── package-lock.json                 # Pinned dependency tree
+├── server.js                         # Application entrypoint, middleware & route mounting
+├── test_phase4.js                    # Integration test suite: circulation, loans & audit
+└── test_phase5_frontend.js           # Integration test suite: HTML views, navigation & redirects
 ```
 
-### Architecture Components
-
-**1. Presentation Layer**
-
-The presentation layer is responsible for displaying the application interface and collecting user input.
-
-It includes:
-- Public landing page.
-- Student dashboard.
-- Administrator dashboard.
-- Book catalogue and details.
-- Borrowing and return forms.
-- Profile and authentication pages.
-
-**2. Application Layer**
-
-Core PHP handles the actual application logic, including:
-- User registration and login.
-- Book and inventory operations.
-- Borrowing request processing.
-- Request approval and rejection.
-- Book issuing and returning.
-- Fine calculation.
-- Student account management.
-
-**3. Authentication and Authorization Layer**
-
-The authentication layer manages user sessions and ensures that users can access only the functionality permitted by their roles.
-
-The `includes/auth.php` module provides role-based access guards such as `require_admin()` and `require_student()`.
-
-**4. Data Access Layer**
-
-MySQLi prepared statements are used to communicate with the database.
-
-This separates SQL queries from user-supplied values and helps protect database operations against SQL injection.
-
-**5. Database Layer**
-
-MySQL stores user accounts, categories, book inventory, borrowing requests, active loans, and transaction records.
-
-Foreign keys and relational constraints help maintain consistency between related records.
-
-### Application Design Approach
-
-The project uses a modular PHP structure with reusable configuration and include files rather than duplicating common functionality across pages.
-
-For example:
-- `config/database.php` centralizes database connectivity and helper functions.
-- `includes/auth.php` manages access control.
-- Shared header, footer, and sidebar components maintain consistent layouts.
-- Separate `admin/` and `student/` modules organize role-specific functionality.
+> **Note on Legacy Directories:** Empty legacy folders (`admin/`, `config/`, `includes/`, `student/`) remain on disk from an earlier development iteration. In `server.js`, backwards-compatible redirects (e.g. `/login.php` -> `/login`, `/admin/dashboard.php` -> `/admin/dashboard`) ensure legacy bookmarks continue to function seamlessly.
 
 ---
 
-## 6. Database Design
+## 6. Prerequisites and Software Requirements
 
-The application uses a relational MySQL database named `library_management`, consisting of **six interconnected tables**.
+Before running the project, ensure your workstation has the following installed:
 
-The database is designed to maintain relationships between users, books, borrowing requests, issued copies, and transaction records.
-
-### Database Entities
-
-| Table | Purpose |
-|---|---|
-| `users` | Stores student and administrator accounts, credentials, roles, and profile information. |
-| `categories` | Stores academic and general book categories. |
-| `books` | Maintains book information, ISBN, category, and copy availability. |
-| `borrow_requests` | Tracks student borrowing requests and their approval status. |
-| `issued_books` | Maintains book circulation records, issue dates, due dates, returns, and fines. |
-| `transactions` | Records important library operations and administrative activities. |
-
-### Entity Relationship Diagram
-
-```mermaid
-erDiagram
-    CATEGORIES ||--o{ BOOKS : categorizes
-    USERS ||--o{ BORROW_REQUESTS : submits
-    BOOKS ||--o{ BORROW_REQUESTS : requested_for
-    USERS ||--o{ ISSUED_BOOKS : borrows
-    BOOKS ||--o{ ISSUED_BOOKS : issued_as
-    BORROW_REQUESTS ||--o| ISSUED_BOOKS : generates
-    USERS ||--o{ TRANSACTIONS : performs
-    BOOKS ||--o{ TRANSACTIONS : references
-    ISSUED_BOOKS ||--o{ TRANSACTIONS : generates
-
-    USERS {
-        int id PK
-        varchar email UK
-        varchar student_id
-        enum role
-    }
-
-    CATEGORIES {
-        int id PK
-        varchar name
-    }
-
-    BOOKS {
-        int id PK
-        int category_id FK
-        varchar isbn UK
-        int available_copies
-    }
-
-    BORROW_REQUESTS {
-        int id PK
-        int user_id FK
-        int book_id FK
-        enum status
-    }
-
-    ISSUED_BOOKS {
-        int id PK
-        int borrow_request_id FK
-        int user_id FK
-        int book_id FK
-        date issue_date
-        date due_date
-        date return_date
-        decimal fine_amount
-    }
-
-    TRANSACTIONS {
-        int id PK
-        int user_id FK
-        int book_id FK
-        int issued_book_id FK
-        enum action
-        text notes
-    }
-```
-
-### Important Database Design Decisions
-
-**Primary Keys and Foreign Keys**
-
-- Every major entity has a primary key.
-- Foreign keys connect related entities.
-- Relationships prevent records from becoming disconnected from their associated entities.
-
-**Uniqueness Constraints**
-
-- Email addresses are unique in the users table.
-- ISBN values are unique in the books table.
-
-**Referential Integrity**
-
-Foreign key constraints maintain relationships between records and help prevent invalid references.
-
-**Inventory Consistency**
-
-The `books` table maintains total and available copy counts. These values are updated when books are issued and returned.
-
-**Historical Record Keeping**
-
-The `issued_books` and `transactions` tables maintain circulation and activity history instead of treating borrowing as a temporary operation.
+1. **Node.js**: Version `18.0.0` or higher ([Download Node.js](https://nodejs.org/)).
+2. **npm**: Version `9.0.0` or higher (bundled with Node.js).
+3. **MySQL Server**: Version `5.7+` or `8.0+` (or **MariaDB 10.4+**). You can run MySQL via:
+   - Standalone MySQL Community Server, or
+   - XAMPP / WampServer (using the MySQL service).
+4. **Modern Web Browser**: Google Chrome, Mozilla Firefox, Microsoft Edge, or Safari.
 
 ---
 
-## 7. Core Application Workflows
+## 7. Installation Instructions
 
-This section explains how the application's business logic works beyond basic CRUD operations.
+### Step 1: Clone or Open the Project
+Clone the repository and enter the project root directory:
+```bash
+git clone https://github.com/apoorva-shree/The_Archive.git
+cd The_Archive
+```
+*(If you downloaded or extracted a ZIP archive, simply open your terminal inside the extracted `The_Archive` folder)*.
 
-### A. Book Borrowing Workflow
+### Step 2: Install Node.js Dependencies
+Install all required production and development dependencies listed in `package.json`:
+```bash
+npm install
+```
+This will download and install `express`, `mysql2`, `express-session`, `express-mysql-session`, `bcryptjs`, `dotenv`, `multer`, and `nodemon`.
+
+---
+
+## 8. Environment Variable Configuration
+
+The application reads its runtime configuration from a `.env` file in the project root. A template file named `.env.example` is provided in the repository.
+
+### Step 1: Create the `.env` File
+Copy `.env.example` to create your local `.env`:
+
+- **Windows (PowerShell):**
+  ```powershell
+  Copy-Item .env.example .env
+  ```
+- **Windows (Command Prompt):**
+  ```cmd
+  copy .env.example .env
+  ```
+- **macOS / Linux:**
+  ```bash
+  cp .env.example .env
+  ```
+
+### Step 2: Configure Environment Variables
+Open `.env` in your text editor and adjust the values to match your local setup:
+
+```env
+# Server Port
+PORT=3000
+NODE_ENV=development
+
+# MySQL Database Configuration
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASS=your_mysql_password_here
+DB_NAME=library_management
+
+# Session Secret Key
+SESSION_SECRET=your_random_session_secret_here
+```
+
+### How to Generate a Strong Random Session Secret
+Do not use a default or predictable string for `SESSION_SECRET`. You can generate a cryptographically strong 32-byte hexadecimal secret by running the following command in your terminal:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Copy the printed output and paste it as the `SESSION_SECRET` value in your `.env` file.
+
+### Environment Variables Reference
+
+| Variable | Description | Example / Default | Notes |
+|---|---|---|---|
+| `PORT` | Port number on which Express listens | `3000` | Change if port 3000 is occupied |
+| `NODE_ENV` | Application environment mode | `development` | Set to `production` when serving over HTTPS |
+| `DB_HOST` | MySQL database server hostname | `localhost` | Usually `localhost` or `127.0.0.1` |
+| `DB_PORT` | MySQL database port number | `3306` | Default MySQL port |
+| `DB_USER` | MySQL username | `root` | Your MySQL database user |
+| `DB_PASS` | MySQL password | *(empty string)* | Set to your MySQL password; leave blank if none |
+| `DB_NAME` | Database schema name | `library_management` | Must match the database defined in `database.sql` |
+| `SESSION_SECRET` | Secret key used to sign session cookies | `your_random_session_secret_here` | Cryptographically random string (see generator above) |
+
+> **Security Notice:** Never commit your actual `.env` file containing database passwords or session secrets to GitHub or public repositories. Ensure `.env` is listed in `.gitignore`.
+
+---
+
+## 9. MySQL Database Setup
+
+The database schema and sample demonstration records are defined in `database.sql`.
+
+### Step 1: Start MySQL Service
+Ensure your MySQL server is running (e.g., click **Start** next to MySQL in the XAMPP Control Panel, or ensure the MySQL service is running).
+
+### Step 2: Import the Database Schema
+
+#### Option A: Using MySQL Command Line (CLI)
+Open a terminal and run the following command (enter your MySQL root password when prompted):
+```bash
+mysql -u root -p < database.sql
+```
+*(If your MySQL user has no password, run `mysql -u root < database.sql`)*.
+
+#### Option B: Using phpMyAdmin (Web GUI)
+1. Open your browser and navigate to `http://localhost/phpmyadmin`.
+2. Click the **Import** tab at the top.
+3. Click **Choose File** and select `The_Archive/database.sql`.
+4. Click **Import** (or **Go**) at the bottom.
+
+### Exact Database Tables Count & Overview
+
+The `database.sql` file creates the `library_management` database and defines **exactly 6 relational tables**:
+
+1. `categories`: Academic and departmental disciplines (6 sample categories).
+2. `users`: Administrator and student accounts with bcrypt-hashed credentials (4 sample users).
+3. `books`: Book catalog, ISBNs, metadata, and total/available stock (12 sample titles).
+4. `borrow_requests`: Student borrowing requests and admin notes (6 sample requests).
+5. `issued_books`: Active, overdue, and returned circulation records with due dates and fines (5 sample loans).
+6. `transactions`: Audit log recording circulation events (14 sample records).
+
+*(Additionally, a 7th table named `sessions` is created automatically at runtime by `express-mysql-session` when the server starts with `createDatabaseTable: true` in `src/config/session.js`)*.
+
+### Demonstration Login Credentials
+
+The `database.sql` script pre-seeds four accounts with bcrypt-hashed passwords for demonstration purposes:
+
+| Role | Name | Email | Password | Identifier / Roll No | Purpose |
+|---|---|---|---|---|---|
+| **Administrator** | System Administrator | `admin@library.com` | `admin123` | `EMP-001` | Administrative dashboard, catalog CRUD, circulation |
+| **Student 1** | Rahul Sharma | `rahul.sharma@college.edu` | `student123` | `CS2024001` | Demonstration of overdue loan with fine (*Clean Code*) |
+| **Student 2** | Priya Patel | `priya.patel@college.edu` | `student123` | `IT2024045` | Demonstration of overdue loan with fine (*Advanced Math*) |
+| **Student 3** | Ananya Verma | `ananya.verma@college.edu` | `student123` | `EC2024018` | Demonstration of active on-time loan (*Algorithms*) |
+
+> **⚠️ Local Development / Testing Credentials Only:**<br/>
+> The credentials above are pre-seeded in `database.sql` strictly for local evaluation, grading, and demonstration of edge cases (such as overdue loans and fine math). They must **never** be used in a production environment. Production environments must provision unique credentials and employ strong passwords.
+
+*(New student accounts can also be created dynamically via the public registration portal at `/register`)*.
+
+---
+
+## 10. How to Run the Project Locally
+
+Once dependencies are installed and the database is imported, start the server:
+
+### Option 1: Standard / Production Mode
+```bash
+npm start
+```
+Runs `node server.js` and listens on `http://localhost:3000`.
+
+### Option 2: Development Mode (Auto-Restart on Edits)
+```bash
+npm run dev
+```
+Runs `nodemon server.js`. The server automatically reloads whenever JavaScript files are modified.
+
+### Accessing the Application
+Once the server logs confirmation in your terminal:
+- **Public Portal:** Open `http://localhost:3000` in your web browser.
+- **Login Page:** Navigate to `http://localhost:3000/login`.
+- **System Health Endpoint:** Visit `http://localhost:3000/health` to verify server uptime.
+- **Database Health Endpoint:** Visit `http://localhost:3000/health/db` to verify live MySQL connection and table count.
+
+---
+
+## 11. Available npm Commands
+
+The following scripts are defined in `package.json`:
+
+| Command | Script Command | Description |
+|---|---|---|
+| `npm start` | `node server.js` | Launches the Node.js/Express server in standard execution mode. |
+| `npm run dev` | `nodemon server.js` | Launches the server in development mode using `nodemon` with automatic reload. |
+| `npm test` | `echo "Error: no test specified" && exit 1` | Default npm placeholder test script. |
+
+*(For automated test suites, see [Section 14: Testing Instructions](#14-testing-instructions))*.
+
+---
+
+## 12. Application Modules and Functionality
 
 ```mermaid
 flowchart TD
-    A[Student Browses Catalogue] --> B[Selects a Book]
-    B --> C{Book Available?}
-    C -->|No| D[Request Rejected]
-    C -->|Yes| E{Existing Active Loan?}
-    E -->|Yes| F[Borrowing Blocked]
-    E -->|No| G{Duplicate Pending Request?}
-    G -->|Yes| H[Duplicate Request Blocked]
-    G -->|No| I[Submit Borrow Request]
-    I --> J[Admin Reviews Request]
-    J --> K{Admin Decision}
-    K -->|Reject| L[Request Rejected with Remarks]
-    K -->|Approve| M[Create Loan and Update Inventory]
-    M --> N[Student Tracks Borrowed Book]
+    subgraph Client["Client Tier"]
+        Browser["Web Browser (Pure HTML5 + Native CSS3)"]
+    end
+
+    subgraph Server["Application Tier (Node.js & Express.js)"]
+        ServerEntry["server.js (App & Route Mounting)"]
+
+        subgraph Middleware["Middleware Pipeline"]
+            SessionMW["express-session + MySQLStore"]
+            FlashMW["Flash Alerts (src/middleware/flash.js)"]
+            AuthGuards["RBAC Guards (src/middleware/auth.js)"]
+            MulterMW["Multer Uploads (src/config/upload.js)"]
+        end
+
+        subgraph Routes["Application Modules"]
+            AuthMod["Authentication (/login, /register, /logout)"]
+            BookMod["Catalog & Inventory (/books, /admin/books)"]
+            BorrowMod["Borrow Requests (/student/borrow-requests, /admin/borrow-requests)"]
+            CircMod["Circulation & Fines (/admin/circulation/*, /student/my-loans)"]
+            TxMod["Audit Ledger (/admin/transactions)"]
+        end
+
+        subgraph Renderer["Custom HTML Rendering System"]
+            HtmlRender["htmlRenderer.js (Pure HTML + Token Substitution + XSS Escaping)"]
+        end
+    end
+
+    subgraph Database["Persistence Tier (MySQL)"]
+        DB[(library_management)]
+    end
+
+    Browser <--> ServerEntry
+    ServerEntry --> Middleware
+    Middleware --> Routes
+    Routes --> HtmlRender
+    Routes <--> DB
+    HtmlRender --> Browser
 ```
 
-The workflow ensures that requests are validated before they reach the administrator.
+### 1. Authentication & Session Module (`src/routes/auth.js`)
+- Handles user sign-in (`/login`) with role-based redirection: admins route to `/admin/dashboard`, students route to `/student/dashboard`.
+- Student registration (`/register`) with automatic hashing of user passwords and conflict checking for email and student ID numbers.
+- Safe logout (`/logout`) that terminates sessions and clears cookies.
+- Profile viewer and updater (`/student/profile`) supporting password changes verified against the current password.
 
-### B. Book Issuing and Returning
+### 2. Catalog & Inventory Module (`src/routes/books.js`)
+- Universal public catalog search (`/books` or `/student/books`) with multi-column queries (`title`, `author`, `ISBN`) and department category filters.
+- Admin catalog inventory manager (`/admin/books`) with full CRUD operations.
+- Book cover image uploads powered by Multer with image file-type validation (`.jpg`, `.jpeg`, `.png`, `.webp`, `.svg`) and 5MB size limits.
+- Stock availability protection ensuring available copies cannot exceed total copies.
 
-When an administrator approves a borrowing request:
+### 3. Borrow Requests Module (`src/routes/borrow.js`)
+- Student request submission (`/student/borrow-requests`) verifying that the student account is active, available copies exist, no duplicate pending request exists, and the student does not already hold the book.
+- Admin request review queue (`/admin/borrow-requests`) with one-click approval or rejection with mandatory feedback remarks.
+- Transaction logging for every request, approval, and rejection.
 
-1. The system validates book availability.
-2. The request status is updated.
-3. An active loan record is created.
-4. The available copy count is decremented.
-5. The transaction is recorded.
+### 4. Circulation & Fine Engine (`src/routes/circulation.js`, `src/utils/circulation.js`)
+- **Direct Book Issue (`/admin/circulation/issue`):** Direct issuance to registered students with configurable loan duration (default: 14 days, `LOAN_PERIOD_DAYS = 14`).
+- **Return Processing (`/admin/circulation/return/:id`):** Check-in confirmation displaying accumulated overdue days and fines. Restores book inventory atomically via `UPDATE books SET available_copies = LEAST(total_copies, available_copies + 1)`.
+- **Overdue Detection (`/admin/circulation/overdue`):** Dynamic query identifying all loans where `status IN ('issued', 'overdue') AND due_date < CURDATE()`.
+- **Fine Calculation Policy (`src/utils/circulation.js`):**
+  - Dates are parsed and evaluated in Indian Standard Time (`+05:30` / `Asia/Kolkata`).
+  - Standard loan period: 14 days (`LOAN_PERIOD_DAYS = 14`).
+  - Daily overdue fine rate: ₹5.00 per day (`FINE_PER_DAY = 5.00`).
+  - If a book is returned on or before its due date (`diffDays <= 0`): fine is ₹0.00 (`isOverdue = false`).
+  - If a book is returned past its due date (`diffDays > 0`):
+    \[
+    \text{Fine Amount} = \text{Overdue Days} \times ₹5.00
+    \]
 
-When a book is returned:
+### 5. Audit Ledger Module (`src/routes/transactions.js`)
+- Accessible to administrators at `/admin/transactions`.
+- Application-level transaction logging of timestamp, actor, book ID, action type, and notes.
+- Search and filtering across student names, student IDs, book titles, and action types.
 
-1. The system identifies the associated loan.
-2. The return date is recorded.
-3. Overdue days are calculated.
-4. The applicable fine is determined.
-5. The loan status is updated.
-6. Available inventory is incremented.
-7. A return transaction is recorded.
-
-### C. Fine Calculation Logic
-
-The system calculates overdue fines based on the number of days a book remains overdue.
-
-**Default borrowing policy:**
-- Standard borrowing duration: 14 days.
-- Default fine: ₹5 per overdue day.
-
-The calculation follows:
-
-\[
-\text{Fine} =
-\text{Overdue Days} \times ₹5
-\]
-
-If a book is returned before or on its due date, no overdue fine is applied.
-
-The overdue calculation is handled through the `calculate_overdue_and_fine()` helper function in `config/database.php`.
-
-### D. Inventory Management Logic
-
-Inventory updates are performed whenever a book is issued or returned.
-
-**On issuing:**
-
-```sql
-UPDATE books
-SET available_copies = available_copies - 1
-WHERE id = ? AND available_copies > 0;
-```
-
-**On returning:**
-
-```sql
-UPDATE books
-SET available_copies = LEAST(total_copies, available_copies + 1)
-WHERE id = ?;
-```
-
-These checks help prevent negative inventory and ensure available copies do not exceed the total copy count.
-
-### E. Transaction Management
-
-Critical circulation operations use MySQL transactions.
-
-```php
-$conn->begin_transaction();
-
-try {
-    // Execute related database operations.
-
-    $conn->commit();
-
-} catch (Exception $e) {
-
-    $conn->rollback();
-
-    throw $e;
-}
-```
-
-This ensures that related database operations are committed together or rolled back when an operation fails, preventing partially completed circulation updates.
+### 6. Legacy Route Compatibility
+- Preserves bookmarks and legacy links by 302-redirecting legacy `.php` paths to clean Node.js routes (e.g., `/login.php` -> `/login`, `/admin/manage_books.php` -> `/admin/books`, `/student/my_books.php` -> `/student/my-loans`).
 
 ---
 
-## 8. Security and Engineering Practices
+## 13. Authentication and Security Features
 
-Security and data integrity were considered throughout the development process.
+An audit of the actual codebase reveals the following implemented security mechanisms:
 
-| Security Practice | Implementation |
-|---|---|
-| Password Security | PHP `password_hash()` and `password_verify()` using bcrypt-compatible password hashing. |
-| SQL Injection Prevention | MySQLi prepared statements and parameter binding. |
-| XSS Prevention | Output escaping using `htmlspecialchars()`. |
-| Session Security | PHP session management and `session_regenerate_id(true)`. |
-| Role-Based Access Control | Separate administrator and student access guards. |
-| Input Validation | Client-side and server-side validation. |
-| Database Integrity | Primary keys, foreign keys, and unique constraints. |
-| Transaction Safety | MySQL transaction handling with commit and rollback. |
-| Inventory Validation | Conditional stock updates to prevent negative availability. |
-| Administrative Accountability | Transaction history for important library operations. |
-
-### A Closer Look at Security Implementation
-
-**1. Password Hashing**
-
-Passwords are not stored as plain text.
-
-PHP's native password hashing functions are used:
-
-```php
-$hashedPassword = password_hash(
-    $password,
-    PASSWORD_DEFAULT
-);
-```
-
-During authentication:
-
-```php
-password_verify(
-    $password,
-    $user['password']
-);
-```
-
-**2. SQL Injection Prevention**
-
-Database queries use prepared statements:
-
-```php
-$stmt = $conn->prepare(
-    "SELECT * FROM users WHERE email = ?"
-);
-
-$stmt->bind_param("s", $email);
-$stmt->execute();
-```
-
-**3. Cross-Site Scripting Prevention**
-
-Dynamic output is escaped using the custom `e()` helper:
-
-```php
-htmlspecialchars(
-    $value,
-    ENT_QUOTES,
-    'UTF-8'
-);
-```
-
-**4. Session Protection**
-
-After successful authentication, the session ID is regenerated to reduce the risk of session fixation.
-
-User identification and role information are maintained through PHP sessions.
-
-**5. Role-Based Authorization**
-
-Protected pages use centralized authentication guards to prevent students from accessing administrator functionality and vice versa.
+1. **Password Hashing:** Passwords are not stored in plaintext. They are salted and hashed using `bcryptjs` (compatible with bcrypt hashes in `database.sql`).
+2. **Session Security & MySQL Persistence (`src/config/session.js`):** Sessions are signed using `SESSION_SECRET` and stored in the MySQL `sessions` table via `express-mysql-session`. Configuration highlights:
+   - `key: 'the_archive_sid'`: Custom session cookie name.
+   - `httpOnly: true`: Prevents client-side JavaScript from accessing the session cookie.
+   - `sameSite: 'lax'`: Provides browser-level cookie protection during top-level cross-site navigations. *(Note: Synchronizer CSRF tokens are not implemented on HTML forms)*.
+   - `secure`: Automatically set to `true` when `NODE_ENV === 'production'` (requires HTTPS), and `false` during local development.
+   - `maxAge: 86400000`: 24-hour cookie lifetime matching store expiration (`expiration: 86400000`).
+   - `checkExpirationInterval: 900000`: Automatically clears expired session records from MySQL every 15 minutes.
+3. **Role-Based Access Control (RBAC) (`src/middleware/auth.js`):** Centralized route middleware (`requireLogin`, `requireAdmin`, `requireStudent`) verifies session authentication and user roles before granting access to protected routes.
+4. **SQL Query Parameterization:** Database queries in `src/routes/` and `src/config/` use prepared statements and parameterized inputs via `mysql2/promise` to mitigate SQL injection. User input is supplied via parameter placeholders (`?`) rather than direct string interpolation.
+5. **Output Escaping in Custom HTML Rendering System (`src/utils/htmlRenderer.js`):** The custom HTML renderer includes an `escapeHtml()` function that converts characters (`&`, `<`, `>`, `"`, `'`) to HTML entities for standard `{{key}}` tokens to protect against Cross-Site Scripting (XSS). Unescaped tokens (`{{{key}}}` / `{{raw:key}}`) are reserved for trusted, server-generated HTML fragments.
+6. **Transaction Handling with Row-Level Locks:** Sensitive circulation workflows (such as approving borrow requests, manual issuing, and return clearance) utilize database transactions (`beginTransaction()`, `commit()`, `rollback()`) combined with `FOR UPDATE` row locks to prevent negative inventory during concurrent requests.
+7. **File Upload Restrictions (`src/config/upload.js`):** Multer configuration restricts book cover uploads to specific extensions (`.jpg`, `.jpeg`, `.png`, `.webp`, `.svg`) and enforces a 5MB maximum file size limit (`fileSize: 5 * 1024 * 1024`). Files are uniquely renamed with timestamps (`book_${Date.now()}_${randomSuffix}${ext}`) and stored locally in `assets/images/covers`.
+8. **Application-Level Transaction Logging (`src/utils/circulation.js`):** Administrative circulation actions are recorded into the `transactions` table. *(Note: This is an application-level audit trail; the MySQL table itself does not have database-level immutability constraints or triggers)*.
 
 ---
 
-## 9. Project Structure
+## 14. Testing Instructions
 
-```text
-libs/
-│
-├── assets/
-│   ├── css/
-│   │   └── style.css
-│   └── images/
-│       └── covers/
-│
-├── config/
-│   └── database.php
-│
-├── includes/
-│   ├── auth.php
-│   ├── header.php
-│   ├── footer.php
-│   └── sidebar.php
-│
-├── admin/
-│   ├── dashboard.php
-│   ├── manage_books.php
-│   ├── add_book.php
-│   ├── edit_book.php
-│   ├── delete_book.php
-│   ├── manage_students.php
-│   ├── borrow_requests.php
-│   ├── issue_book.php
-│   ├── issued_books.php
-│   ├── return_book.php
-│   ├── overdue_books.php
-│   └── transactions.php
-│
-├── student/
-│   ├── dashboard.php
-│   ├── books.php
-│   ├── book_details.php
-│   ├── request_borrow.php
-│   ├── my_books.php
-│   ├── borrow_history.php
-│   └── profile.php
-│
-├── index.php
-├── login.php
-├── register.php
-├── logout.php
-├── database.sql
-└── README.md
-```
+The project includes two integration test suites that validate backend circulation logic, database integrity, HTML views, and route security.
 
-### Code Organization
-
-- **assets/** – Stylesheets and book cover assets.
-- **config/** – Database connection, configuration constants, and reusable helper functions.
-- **includes/** – Shared UI components and authentication/authorization logic.
-- **admin/** – Administrator-specific application modules.
-- **student/** – Student-specific application modules.
-- **database.sql** – Database schema and pre-seeded evaluation data.
-
----
-
-## 10. Installation and Setup
-
-Follow these steps to run The Archive locally.
-
-### Prerequisites
-
-- XAMPP
-- PHP
-- MySQL or MariaDB
-- Web browser
-
-### Step 1: Clone the Repository
+### Test Suite 1: Backend Circulation & API Integration (`test_phase4.js`)
+Validates authentication, catalog searching, borrow request lifecycles, book issues, return clearance, overdue fine math, and transaction logging.
 
 ```bash
-git clone https://github.com/apoorva-shree/The_Archive.git
+# Ensure the server is running in another terminal (npm start)
+node test_phase4.js
 ```
 
-Alternatively, download the repository as a ZIP file.
+**Key Scenarios Verified:**
+- Rejection of invalid credentials and acceptance of valid logins.
+- Catalog search and category filtering.
+- Eligibility checks on borrowing (preventing duplicates, checking inventory).
+- Loan creation and available stock decrement.
+- Return processing, stock replenishment, and fine calculation.
+- Transaction logging verification.
 
-### Step 2: Move the Project to XAMPP
+### Test Suite 2: Frontend HTML Views & Navigation Integration (`test_phase5_frontend.js`)
+Validates that all migrated HTML templates render cleanly with valid status codes, correct header/sidebar components, flash message propagation, and legacy `.php` redirects.
 
-Place the project folder inside:
-
-```text
-C:\xampp\htdocs\libs
+```bash
+# Ensure the server is running in another terminal (npm start)
+node test_phase5_frontend.js
 ```
 
-### Step 3: Start Apache and MySQL
-
-1. Open XAMPP Control Panel.
-2. Start Apache.
-3. Start MySQL.
-4. Ensure both services are running.
-
-### Step 4: Create and Import the Database
-
-1. Open `http://localhost/phpmyadmin`.
-2. Create a database named:
-
-```sql
-library_management
-```
-
-3. Select the newly created database.
-4. Navigate to the Import tab.
-5. Select the project's `database.sql` file.
-6. Click Import/Go.
-
-The database schema and sample evaluation records will be created.
-
-### Step 5: Configure Database Connection
-
-Check the database configuration in:
-
-```text
-config/database.php
-```
-
-Ensure the hostname, database name, username, and password match your local MySQL configuration.
-
-### Step 6: Launch the Application
-
-Open:
-
-```text
-http://localhost/libs/
-```
-
-You can now explore the public portal and log in using the evaluation credentials below.
+**Key Scenarios Verified:**
+- Public landing page, login, and registration view rendering.
+- Role-based redirect guards on protected views.
+- Student dashboard, catalog view, book details view, and loan portfolio rendering.
+- Administrator dashboard, catalog management, circulation forms, and audit ledger rendering.
+- Legacy `.php` URL redirect handling.
 
 ---
 
-## 11. Demo Credentials
+## 15. Team Contribution Information
 
-The database comes pre-seeded with sample users, categories, books, borrowing requests, active loans, overdue records, and transaction logs.
+This project was developed for the **B.Tech Web Development Lab Evaluation** at the **Indian Institute of Information Technology (IIIT) Kota**.
 
-| Role | Email | Password | Student / Roll ID |
-|---|---|---|---|
-| Administrator | `admin@library.com` | `admin123` | `EMP-001` |
-| Student 1 | `rahul.sharma@college.edu` | `student123` | `CS2024001` |
-| Student 2 | `priya.patel@college.edu` | `student123` | `IT2024045` |
-| Student 3 | `ananya.verma@college.edu` | `student123` | `EC2024018` |
+- **Repository:** [GitHub – The Archive](https://github.com/apoorva-shree/The_Archive)
+- **Institution:** IIIT Kota
 
-**Sample evaluation scenarios:**
-- Student 1: Overdue book (*Clean Code*) with an applicable fine.
-- Student 2: Overdue book (*Advanced Mathematics*) with an applicable fine.
-- Student 3: Active loan (*Algorithms*).
-
-New students can also register through the public registration page.
-
-> **Note:** These are demonstration credentials intended for local evaluation. Change them and configure appropriate deployment security before exposing the application publicly.
+### Contribution Guidelines
+When collaborating or contributing improvements to this repository:
+1. **Branching Strategy:** Create a descriptive feature branch (`git checkout -b feature/improved-circulation`).
+2. **Follow Stack Principles:**
+   - Maintain pure HTML5 and native CSS3 for all frontend views.
+   - Do **not** introduce frontend JavaScript, client-side CDNs, or external CSS frameworks.
+   - All dynamic rendering must pass through `src/utils/htmlRenderer.js` with proper HTML escaping.
+3. **Database Integrity:** Always use parameterized SQL queries via `pool.query()` or transactional connections.
+4. **Verification:** Run `node test_phase4.js` and `node test_phase5_frontend.js` before submitting pull requests.
 
 ---
 
-## 12. Technical Highlights
+## 16. Future Improvements
 
-The following implementation decisions demonstrate the engineering considerations behind the project.
+While The Archive provides a complete digital library circulation system, the following enhancements represent realistic future scope:
 
-| Area | Technical Implementation |
-|---|---|
-| Application Architecture | Modular, server-rendered PHP architecture |
-| User Management | Session-based authentication and role-based authorization |
-| Database Design | Six relational MySQL tables |
-| Query Handling | MySQLi prepared statements |
-| Password Security | Native PHP password hashing |
-| Inventory Management | Conditional SQL stock updates |
-| Data Consistency | Database transactions and rollback |
-| Business Logic | Borrowing validation, circulation management, and fine calculation |
-| Auditability | Persistent transaction history |
-| Frontend Design | Native HTML5 and responsive CSS3 |
-
-### Project Focus
-
-The project demonstrates practical implementation of:
-
-- Full-stack web application development.
-- Relational database design and relationships.
-- Authentication and authorization.
-- CRUD operations and data validation.
-- Backend business logic.
-- Database transaction management.
-- Inventory and resource management.
-- Responsive user interface development.
+- **Automated Email & SMS Notifications:** Automated reminders sent to students 48 hours before loan deadlines and alerts upon request approvals.
+- **Barcode & QR Code Scanning:** Integration with camera-based or handheld barcode scanners for book check-in and check-out at the library counter.
+- **Scheduled Cron Jobs:** Automated daily midnight jobs to evaluate overdue loans, advance loan statuses, and update fine totals.
+- **Waitlist & Reservation Queues:** Enabling students to join a digital reservation queue for titles that are currently out of stock.
+- **CSRF Token Implementation:** Adding synchronizer tokens to HTML forms for defense-in-depth CSRF protection.
+- **Digital Resource Repository:** Support for uploading open-access lecture notes and faculty syllabi as downloadable PDFs.
+- **Advanced Circulation Analytics:** Administrative visual reporting on peak borrowing periods and category demand trends.
 
 ---
 
-## 13. Future Scope
-
-The current implementation provides the core functionality required for digital library operations. Some potential enhancements include:
-
-- Email notifications for borrowing approvals and upcoming due dates.
-- QR code or barcode-based book issuing and returns.
-- Advanced analytics for identifying popular books and borrowing patterns.
-- Book reservation queues for currently unavailable titles.
-- Digital book resources and downloadable study materials.
-- Deployment on a cloud-hosted server with production database configuration.
-- Automated database backups and recovery mechanisms.
-
-These enhancements could further improve accessibility, automation, and scalability.
-
----
-
-## Developed For
-
-**Web Development Lab Evaluation | IIIT Kota**
-
-**Project:** The Archive – Digital Library Management System
-
-**Repository:** [GitHub – The Archive](https://github.com/apoorva-shree/The_Archive)
-
-*Designed to make academic resources more accessible, library operations more efficient, and knowledge easier to discover.*
-
----
-
-**The Archive — Where Learning Goes Beyond Classrooms.**
+**The Archive — Where Learning Goes Beyond Classrooms.**<br/>
+*Indian Institute of Information Technology (IIIT) Kota*
